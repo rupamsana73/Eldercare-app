@@ -1,0 +1,391 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Reminder System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+/* ===== DASHBOARD HEADER ===== */
+.dashboard-header{
+  background:#0b3a5a;
+  color:#ffffff;
+  padding:14px 16px;
+  font-size:16px;
+  font-weight:600;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  box-shadow:0 4px 12px rgba(0,0,0,.15);
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+
+.header-title {
+  flex: 1;
+  text-align: center;
+}
+
+.back-btn {
+  color: white;
+  text-decoration: none;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.empty-space {
+  width: 40px;
+}
+
+/* page wrapper */
+.dashboard-wrapper{
+  max-width:420px;
+  margin:0 auto;
+  background:#ffffff;
+  min-height:100vh;
+}
+
+/* ===== BASE ===== */
+:root{
+  --bg:#f6f8fb;
+  --card:#ffffff;
+  --text:#0f172a;
+  --muted:#6b7280;
+  --primary:#2563eb;
+  --success:#16a34a;
+  --warning:#f59e0b;
+  --danger:#dc2626;
+  --shadow:0 8px 24px rgba(0,0,0,.06);
+  --radius:14px;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto;
+}
+
+.container{
+  padding:16px;
+}
+
+/* MED CARD */
+.med-card{
+  background:var(--card);
+  border-radius:14px;
+  box-shadow:var(--shadow);
+  padding:14px;
+  margin-bottom:14px;
+  position: relative;
+  border-left:5px solid var(--primary);
+}
+
+.med-card.missed{
+  border-left-color:var(--danger);
+}
+
+.med-card.completed{
+  border-left-color:var(--success);
+}
+
+.med-card h3{
+  margin:0 0 8px 0;
+  font-size:16px;
+  color:var(--text);
+}
+
+.times .pill {
+  background: #e0e7ff;
+  color: var(--primary);
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+  margin-right: 4px;
+  margin-bottom: 4px;
+}
+
+.muted{
+  color:var(--muted);
+  font-size:12px;
+}
+.ok{
+  color:var(--success);
+  font-size:12px;
+  font-weight:600;
+}
+
+/* ALERTS */
+.alert-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: #fee2e2;
+  color: var(--danger);
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  animation: pulse 1.5s infinite;
+}
+
+.warning-banner {
+  background: #fef2f2;
+  border: 1px solid #f87171;
+  color: #b91c1c;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* TOGGLE SWITCH */
+.toggle-wrapper {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.toggle-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+}
+
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #cbd5e1;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+input:checked + .slider {
+  background-color: var(--success);
+}
+
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+input:disabled + .slider {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Section Titles */
+.section-title {
+  margin: 20px 0 12px;
+  font-size: 16px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-title.upcoming { color: var(--primary); }
+.section-title.missed { color: var(--danger); }
+.section-title.completed { color: var(--success); }
+
+/* Responsive */
+@media (min-width: 601px) {
+  .dashboard-wrapper {
+    max-width: 500px;
+  }
+}
+  </style>
+</head>
+<body>
+
+<div class="dashboard-wrapper">
+  
+  <div class="dashboard-header">
+    <a href="{% url 'dashboard' %}" class="back-btn">←</a>
+    <div class="header-title">Reminder System</div>
+    <div class="empty-space"></div>
+  </div>
+
+  <div class="container">
+    <input type="hidden" id="csrf-token" value="{{ csrf_token }}">
+    <input type="hidden" id="toggle-url" value="{% url 'toggle_reminder_setting' %}">
+
+    {% if show_9pm_warning %}
+      <div class="warning-banner">
+        <span style="font-size: 20px;">⚠️</span>
+        <div>
+          <strong>Missed Medication Alert</strong><br>
+          It's past 9:00 PM and some medications were missed today.
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- UPCOMING REMINDERS -->
+    <h3 class="section-title upcoming">Upcoming Reminders</h3>
+    {% if upcoming_meds %}
+      {% for item in upcoming_meds %}
+        <div class="med-card">
+          {% if item.is_alert %}
+            <div class="alert-badge">30 Min Alert!</div>
+          {% endif %}
+          
+          <h3>{{ item.medicine.name }}</h3>
+          
+          <div class="times">
+            {% for t in item.times %}
+              <span class="pill">{{ t.time }}</span>
+            {% endfor %}
+          </div>
+          
+          <small class="muted">Next dose at {{ item.next_time }}</small>
+          
+          <div class="toggle-wrapper">
+            <span class="toggle-label">Reminders: <span id="status-text-{{ item.medicine.id }}">{{ item.medicine.is_reminder_enabled|yesno:"ON,OFF" }}</span></span>
+            <label class="switch">
+              <input type="checkbox" class="reminder-toggle" data-med-id="{{ item.medicine.id }}" {% if item.medicine.is_reminder_enabled %}checked{% endif %}>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p class="muted" style="text-align:center; padding: 10px;">No upcoming medicines for today.</p>
+    {% endif %}
+
+    <!-- MISSED REMINDERS -->
+    {% if missed_meds %}
+      <h3 class="section-title missed">Missed Today</h3>
+      {% for item in missed_meds %}
+        <div class="med-card missed">
+          <h3>{{ item.medicine.name }}</h3>
+          <div class="times">
+            {% for t in item.times %}
+              <span class="pill">{{ t.time }}</span>
+            {% endfor %}
+          </div>
+          <small class="muted" style="color:var(--danger)">Missed</small>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <!-- COMPLETED REMINDERS -->
+    {% if completed_meds %}
+      <h3 class="section-title completed">Completed Today</h3>
+      {% for item in completed_meds %}
+        <div class="med-card completed">
+          <h3>{{ item.medicine.name }}</h3>
+          <div class="times">
+            {% for t in item.times %}
+              <span class="pill">{{ t.time }}</span>
+            {% endfor %}
+          </div>
+          <small class="ok">Taken</small>
+        </div>
+      {% endfor %}
+    {% endif %}
+    
+    {% if not upcoming_meds and not missed_meds and not completed_meds %}
+       <p class="muted" style="text-align:center; padding: 40px 10px;">No medicines scheduled at all.</p>
+    {% endif %}
+
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const csrfToken = document.getElementById("csrf-token")?.value;
+    const toggleUrl = document.getElementById("toggle-url")?.value;
+
+    document.querySelectorAll('.reminder-toggle').forEach(toggle => {
+      toggle.addEventListener('change', function() {
+        const medId = this.dataset.medId;
+        const isChecked = this.checked;
+        const statusText = document.getElementById(`status-text-${medId}`);
+        
+        this.disabled = true; // Disable while saving
+
+        fetch(toggleUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": csrfToken,
+            "X-Requested-With": "XMLHttpRequest"
+          },
+          body: new URLSearchParams({
+            'medicine_id': medId,
+            'is_enabled': isChecked
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            statusText.textContent = isChecked ? "ON" : "OFF";
+          } else {
+            this.checked = !isChecked; // Revert
+            alert("Failed to update reminder setting: " + data.error);
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          this.checked = !isChecked; // Revert
+          alert("Network error updating reminder.");
+        })
+        .finally(() => {
+          this.disabled = false;
+        });
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

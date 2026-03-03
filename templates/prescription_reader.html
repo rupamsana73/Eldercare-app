@@ -1,0 +1,1035 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Prescription Reader</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* ===== BASE ===== */
+        :root {
+            --bg: #f6f8fb;
+            --card: #ffffff;
+            --text: #0f172a;
+            --muted: #6b7280;
+            --primary: #2563eb;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --shadow: 0 8px 24px rgba(0, 0, 0, .06);
+            --radius: 14px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: system-ui, -apple-system, Segoe UI, Roboto;
+        }
+
+        /* ===== HEADER ===== */
+        .dashboard-header {
+            background: #0b3a5a;
+            color: #ffffff;
+            padding: 14px 16px;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-title {
+            flex: 1;
+            text-align: center;
+        }
+
+        .back-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+        }
+
+        .empty-space {
+            width: 40px;
+        }
+
+        /* ===== WRAPPER ===== */
+        .dashboard-wrapper {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #ffffff;
+            min-height: 100vh;
+        }
+
+        .container {
+            padding: 16px;
+        }
+
+        /* ===== UPLOAD AREA ===== */
+        .upload-card {
+            background: var(--card);
+            border: 2px dashed #cbd5e1;
+            border-radius: var(--radius);
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .upload-card:hover,
+        .upload-card.dragover {
+            border-color: var(--primary);
+            background: #f8fafc;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0 0 8px;
+        }
+
+        .upload-hint {
+            font-size: 13px;
+            color: var(--muted);
+            margin: 0;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* ===== IMAGE PREVIEW ===== */
+        .preview-container {
+            display: none;
+            margin-bottom: 20px;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        .preview-image {
+            width: 100%;
+            display: block;
+            max-height: 300px;
+            object-fit: cover;
+        }
+
+        .change-img-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        /* ===== PROCESS BUTTON ===== */
+        .process-btn {
+            width: 100%;
+            background: #0b3a5a;
+            color: white;
+            border: none;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            display: none;
+            transition: transform 0.1s;
+        }
+
+        .process-btn:active {
+            transform: scale(0.98);
+        }
+
+        .process-btn:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        /* ===== LOADING SPINNER ===== */
+        .loading-container {
+            display: none;
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        /* ===== RESULTS AREA ===== */
+        .results-container {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            margin: 0 0 12px;
+            color: #0b3a5a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .text-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 14px;
+            font-size: 14px;
+            color: var(--text);
+            white-space: pre-wrap;
+            margin-bottom: 24px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .med-match-card {
+            background: var(--card);
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 14px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--success);
+        }
+
+        .med-match-card.low-confidence {
+            border-left-color: var(--warning);
+        }
+
+        .med-match-card.no-match {
+            border-left-color: var(--muted);
+        }
+
+        .med-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .detected-name {
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .confidence-badge {
+            background: #e0e7ff;
+            color: var(--primary);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .confidence-badge.high {
+            background: #dcfce7;
+            color: var(--success);
+        }
+
+        .confidence-badge.med {
+            background: #fef9c3;
+            color: #ca8a04;
+        }
+
+        .match-info {
+            font-size: 13px;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .db-match {
+            font-weight: 600;
+            color: var(--text);
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* ===== ALERTS & TOASTS ===== */
+        .alert-error {
+            background: #fef2f2;
+            color: var(--danger);
+            border: 1px solid #fecaca;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .alert-warning {
+            background: #fffbeb;
+            color: #92400e;
+            border: 1px solid #fde68a;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        /* ===== CONFIRMATION MODAL ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow: auto;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 18px;
+            color: #0b3a5a;
+        }
+
+        .modal-medicines-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .medicine-checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .medicine-checkbox-item:hover {
+            background: #f0f4f8;
+            border-color: #cbd5e1;
+        }
+
+        .medicine-checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+
+        .medicine-checkbox-label {
+            flex: 1;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-btn-confirm {
+            background: #16a34a;
+            color: white;
+        }
+
+        .modal-btn-confirm:hover {
+            background: #15803d;
+        }
+
+        .modal-btn-confirm:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        .modal-btn-cancel {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+
+        .modal-btn-cancel:hover {
+            background: #cbd5e1;
+        }
+
+        .select-all-checkbox {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid #e2e8f0;
+        }
+
+        .select-all-checkbox input {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .modal-success-message {
+            display: none;
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        .modal-success-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .modal-success-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #16a34a;
+            margin-bottom: 8px;
+        }
+
+        .modal-success-subtext {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-wrapper">
+        <!-- HEADER -->
+        <div class="dashboard-header">
+            <a href="{% url 'dashboard' %}" class="back-btn">←</a>
+            <div class="header-title">Prescription Reader</div>
+            <div class="empty-space"></div>
+        </div>
+
+        <div class="container">
+
+            <div id="error-alert" class="alert-error"></div>
+            <div id="ocr-warning" class="alert-warning">
+                <strong>OCR Required:</strong> Tesseract OCR engine was not detected on the server. Image processing
+                will be limited.
+            </div>
+
+            <!-- UPLOAD STAGE -->
+            <div id="upload-stage">
+                <form id="upload-form" enctype="multipart/form-data">
+                    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+                    <div class="upload-card" id="drop-zone"
+                        onclick="document.getElementById('prescription-file-input').click()">
+                        <div class="upload-icon">📄</div>
+                        <h3 class="upload-text">Tap to Upload Prescription</h3>
+                        <p class="upload-hint">JPG or PNG (max 10MB)</p>
+                        {{ form.image }} <!-- The hidden file input -->
+                    </div>
+
+                    <div class="preview-container" id="preview-container">
+                        <img id="image-preview" class="preview-image" src="" alt="Prescription preview">
+                        <button type="button" class="change-img-btn" onclick="resetUpload()">Change Image</button>
+                    </div>
+
+                    <button type="submit" class="process-btn" id="process-btn">Extract Medicines</button>
+                </form>
+            </div>
+
+            <!-- LOADING STAGE -->
+            <div id="loading-stage" class="loading-container">
+                <div class="spinner"></div>
+                <div class="loading-text">Extracting text using OCR...</div>
+                <p style="font-size:13px; color:#64748b; margin-top:8px;">This may take a few seconds.</p>
+            </div>
+
+            <!-- RESULTS STAGE -->
+            <div id="results-stage" class="results-container">
+
+                <h3 class="section-title">💊 Detected Medicines</h3>
+                <div id="medicines-list">
+                    <!-- Javascript will populate this -->
+                </div>
+
+                <div style="margin-top:24px;">
+                    <h3 class="section-title">📝 Extracted Raw Text</h3>
+                    <div class="text-card" id="extracted-text-view"></div>
+                </div>
+
+                <button type="button" class="process-btn"
+                    style="display:block; margin-top:24px; background:#e2e8f0; color:#0f172a;" onclick="resetAll()">Scan
+                    Another Prescription</button>
+
+            </div>
+
+        </div>
+
+        <!-- CONFIRMATION MODAL -->
+        <div id="confirmation-modal" class="modal">
+            <div class="modal-content">
+                <!-- Loading state -->
+                <div id="modal-loading" style="display:none; text-align:center;">
+                    <div class="spinner" style="margin: 20px auto;"></div>
+                    <p style="color:#6b7280; font-size:14px;">Adding medicines...</p>
+                </div>
+
+                <!-- Success state -->
+                <div id="modal-success" style="display:none;" class="modal-success-message">
+                    <div class="modal-success-icon">✓</div>
+                    <div class="modal-success-text">Medicines Added!</div>
+                    <div class="modal-success-subtext">Your medicines have been added to your tracker.</div>
+                    <button type="button" class="process-btn" onclick="resetAll()" style="margin-top:16px;">Scan Another</button>
+                </div>
+
+                <!-- Selection state -->
+                <div id="modal-selection">
+                    <div class="modal-header">
+                        <span style="font-size:20px;">💊</span>
+                        <h2>Confirm Medicines</h2>
+                    </div>
+
+                    <p style="font-size:14px; color:#6b7280; margin-bottom:16px;">
+                        Select medicines to add to your tracker:
+                    </p>
+
+                    <div class="select-all-checkbox">
+                        <input type="checkbox" id="select-all-medicines" onchange="toggleSelectAll()">
+                        <label for="select-all-medicines" style="cursor:pointer; margin:0;">Select all</label>
+                    </div>
+
+                    <div class="modal-medicines-list" id="modal-medicines-list">
+                        <!-- Dynamically populated -->
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="modal-btn modal-btn-cancel" onclick="closeConfirmationModal()">Cancel</button>
+                        <button type="button" class="modal-btn modal-btn-confirm" id="confirm-add-btn" onclick="confirmAddMedicines()">Add Selected</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ============================================================================
+        // PRODUCTION-READY ERROR HANDLING & INPUT VALIDATION
+        // ============================================================================
+        
+        const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+        const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+        
+        // Error tracking
+        const errorLog = [];
+        window.addEventListener('error', function(e) {
+            errorLog.push({
+                type: 'uncaught',
+                message: e.message,
+                source: e.filename,
+                line: e.lineno,
+                col: e.colno
+            });
+            console.error('[TRACKING]', e.message);
+        });
+        
+        // Unhandled promise rejection
+        window.addEventListener('unhandledrejection', function(e) {
+            errorLog.push({
+                type: 'promise',
+                message: e.reason
+            });
+            console.error('[TRACKING]', e.reason);
+        });
+
+        const fileInput = document.getElementById('prescription-file-input');
+        const dropZone = document.getElementById('drop-zone');
+        const previewContainer = document.getElementById('preview-container');
+        const imagePreview = document.getElementById('image-preview');
+        const processBtn = document.getElementById('process-btn');
+        const uploadForm = document.getElementById('upload-form');
+
+        const stageUpload = document.getElementById('upload-stage');
+        const stageLoading = document.getElementById('loading-stage');
+        const stageResults = document.getElementById('results-stage');
+
+        const errorAlert = document.getElementById('error-alert');
+        const ocrWarning = document.getElementById('ocr-warning');
+
+        // Sanitize HTML to prevent XSS
+        function sanitizeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // File validation
+        function validateFile(file) {
+            if (!file) return { valid: false, error: 'No file selected' };
+            if (file.size > MAX_FILE_SIZE) return { valid: false, error: `File is too large. Max ${MAX_FILE_SIZE / 1024 / 1024}MB allowed` };
+            if (!ALLOWED_MIMES.includes(file.type)) return { valid: false, error: 'Invalid image format. Use JPEG, PNG, or WebP' };
+            return { valid: true };
+        }
+
+        // Handle file selection & preview
+        fileInput.addEventListener('change', function() {
+            try {
+                if (this.files && this.files[0]) {
+                    const file = this.files[0];
+                    const validation = validateFile(file);
+                    
+                    if (!validation.valid) {
+                        showError(validation.error);
+                        this.value = '';
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onerror = function() {
+                        showError('Failed to read file. Please try again.');
+                    };
+                    reader.onload = function(e) {
+                        try {
+                            imagePreview.src = e.target.result;
+                            dropZone.style.display = 'none';
+                            previewContainer.style.display = 'block';
+                            processBtn.style.display = 'block';
+                            errorAlert.style.display = 'none';
+                        } catch (err) {
+                            showError('Error displaying preview: ' + err.message);
+                            console.error(err);
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            } catch (err) {
+                showError('File handling error: ' + err.message);
+                console.error(err);
+            }
+        });
+
+        // Drag and drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            try {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                fileInput.files = files;
+                const event = new Event('change', { bubbles: true });
+                fileInput.dispatchEvent(event);
+            } catch (err) {
+                showError('Drop error: ' + err.message);
+                console.error(err);
+            }
+        });
+
+        function resetUpload() {
+            try {
+                fileInput.value = '';
+                dropZone.style.display = 'block';
+                previewContainer.style.display = 'none';
+                processBtn.style.display = 'none';
+                dropZone.classList.remove('dragover');
+            } catch (err) {
+                console.error('Reset error:', err);
+            }
+        }
+
+        function resetAll() {
+            try {
+                resetUpload();
+                stageUpload.style.display = 'block';
+                stageResults.style.display = 'none';
+                ocrWarning.style.display = 'none';
+                document.getElementById('medicines-list').innerHTML = '';
+                document.getElementById('extracted-text-view').textContent = '';
+            } catch (err) {
+                console.error('ResetAll error:', err);
+            }
+        }
+
+        function showError(msg) {
+            try {
+                errorAlert.textContent = msg;
+                errorAlert.style.display = 'block';
+                stageLoading.style.display = 'none';
+                stageUpload.style.display = 'block';
+                processBtn.disabled = false;
+            } catch (err) {
+                console.error('Show error failed:', err);
+            }
+        }
+
+        // Handle form submission (AJAX)
+        uploadForm.addEventListener('submit', function(e) {
+            try {
+                e.preventDefault();
+                
+                if (!fileInput.files || !fileInput.files[0]) {
+                    showError('Please select a prescription image');
+                    return;
+                }
+
+                errorAlert.style.display = 'none';
+                ocrWarning.style.display = 'none';
+                stageUpload.style.display = 'none';
+                stageLoading.style.display = 'block';
+                processBtn.disabled = true;
+
+                const formData = new FormData(this);
+
+                fetch("{% url 'prescription_process' %}", {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        stageLoading.style.display = 'none';
+                        processBtn.disabled = false;
+
+                        if (!data.success) {
+                            showError(sanitizeHtml(data.error) || "An error occurred during processing.");
+                            return;
+                        }
+
+                        // Show OCR warning if applicable
+                        if (!data.ocr_available && data.ocr_warning) {
+                            ocrWarning.textContent = '⚠️ OCR: ' + sanitizeHtml(data.ocr_warning);
+                            ocrWarning.style.display = 'block';
+                        }
+
+                        // Display extracted text
+                        const rawText = data.extracted_text || "(No text extracted)";
+                        document.getElementById('extracted-text-view').textContent = rawText;
+
+                        const listContainer = document.getElementById('medicines-list');
+                        listContainer.innerHTML = '';
+
+                        if (data.matches && Array.isArray(data.matches) && data.matches.length > 0) {
+                            data.matches.forEach((m, idx) => {
+                                try {
+                                    let cardClass = 'med-match-card';
+                                    let badgeClass = 'confidence-badge';
+
+                                    if (!m.matched) {
+                                        cardClass += ' no-match';
+                                    } else if (m.confidence >= 80) {
+                                        badgeClass += ' high';
+                                    } else if (m.confidence >= 50) {
+                                        badgeClass += ' med';
+                                    } else {
+                                        cardClass += ' low-confidence';
+                                    }
+
+                                    const matchHtml = m.matched
+                                        ? `<span>Matches your: <span class="db-match">${sanitizeHtml(m.matched)}</span></span>`
+                                        : `<span>No match in your database</span>`;
+
+                                    const card = document.createElement('div');
+                                    card.className = cardClass;
+                                    card.innerHTML = `
+                                        <div class="med-row">
+                                            <span class="detected-name">${sanitizeHtml(m.detected)}</span>
+                                            <span class="${badgeClass}">${m.matched ? m.confidence + '%' : 'New'}</span>
+                                        </div>
+                                        <div class="match-info">
+                                            ${m.matched ? '🔗' : 'ℹ️'} ${matchHtml}
+                                        </div>
+                                    `;
+                                    listContainer.appendChild(card);
+                                } catch (err) {
+                                    console.error('Error rendering medicine:', err);
+                                }
+                            });
+
+                            showConfirmationModal(data.matches);
+                        } else {
+                            listContainer.innerHTML = '<div class="text-center" style="padding: 20px 0; color: #64748b;">No medicine names detected</div>';
+                        }
+
+                        stageResults.style.display = 'block';
+                    })
+                    .catch(err => {
+                        stageLoading.style.display = 'none';
+                        processBtn.disabled = false;
+                        
+                        if (err instanceof TypeError && err.message.includes('Failed to fetch')) {
+                            showError("Network error. Check your connection and try again.");
+                        } else {
+                            showError("Error: " + (err.message || "Unknown error occurred"));
+                        }
+                        console.error('Fetch error:', err);
+                    });
+            } catch (err) {
+                stageLoading.style.display = 'none';
+                processBtn.disabled = false;
+                showError('Form submission error: ' + err.message);
+                console.error(err);
+            }
+        });
+
+        // Display confirmation modal
+        function showConfirmationModal(matches) {
+            try {
+                const medicinesList = document.getElementById('modal-medicines-list');
+                medicinesList.innerHTML = '';
+
+                matches.forEach((m, index) => {
+                    try {
+                        const medName = m.matched || m.detected;
+                        const medId = 'med-' + index;
+                        
+                        const label = document.createElement('label');
+                        label.className = 'medicine-checkbox-item';
+                        label.htmlFor = medId;
+                        
+                        const input = document.createElement('input');
+                        input.type = 'checkbox';
+                        input.id = medId;
+                        input.value = medName;
+                        input.className = 'med-checkbox';
+                        input.checked = true;
+                        
+                        const span = document.createElement('span');
+                        span.className = 'medicine-checkbox-label';
+                        span.textContent = medName;
+                        
+                        label.appendChild(input);
+                        label.appendChild(span);
+                        medicinesList.appendChild(label);
+                    } catch (err) {
+                        console.error('Error adding checkbox:', err);
+                    }
+                });
+
+                document.getElementById('confirmation-modal').classList.add('active');
+                document.getElementById('modal-selection').style.display = 'block';
+                document.getElementById('modal-loading').style.display = 'none';
+                document.getElementById('modal-success').style.display = 'none';
+            } catch (err) {
+                showError('Error displaying confirmation: ' + err.message);
+                console.error(err);
+            }
+        }
+
+        // Close modal
+        function closeConfirmationModal() {
+            try {
+                document.getElementById('confirmation-modal').classList.remove('active');
+            } catch (err) {
+                console.error('Close modal error:', err);
+            }
+        }
+
+        // Toggle select all
+        function toggleSelectAll() {
+            try {
+                const selectAllCheckbox = document.getElementById('select-all-medicines');
+                const medCheckboxes = document.querySelectorAll('.med-checkbox');
+                medCheckboxes.forEach(checkbox => {
+                    checkbox.checked = selectAllCheckbox.checked;
+                });
+            } catch (err) {
+                console.error('Toggle select all error:', err);
+            }
+        }
+
+        // Confirm and add medicines
+        function confirmAddMedicines() {
+            try {
+                const selectedCheckboxes = document.querySelectorAll('.med-checkbox:checked');
+                const selectedMedicines = Array.from(selectedCheckboxes).map(cb => cb.value);
+
+                if (selectedMedicines.length === 0) {
+                    alert('Please select at least one medicine to add.');
+                    return;
+                }
+
+                document.getElementById('modal-selection').style.display = 'none';
+                document.getElementById('modal-loading').style.display = 'block';
+                document.getElementById('confirm-add-btn').disabled = true;
+
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                fetch("{% url 'prescription_add_medicines' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        medicines: selectedMedicines
+                    })
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        document.getElementById('confirm-add-btn').disabled = false;
+                        
+                        if (data.success) {
+                            document.getElementById('modal-loading').style.display = 'none';
+                            document.getElementById('modal-success').style.display = 'block';
+                            setTimeout(() => {
+                                closeConfirmationModal();
+                                resetAll();
+                            }, 2000);
+                        } else {
+                            alert('Error: ' + sanitizeHtml(data.error || 'Failed to add medicines'));
+                            document.getElementById('modal-loading').style.display = 'none';
+                            document.getElementById('modal-selection').style.display = 'block';
+                        }
+                    })
+                    .catch(err => {
+                        document.getElementById('confirm-add-btn').disabled = false;
+                        document.getElementById('modal-loading').style.display = 'none';
+                        document.getElementById('modal-selection').style.display = 'block';
+                        alert('Error: ' + (err.message || 'Network error') + '. Please try again.');
+                        console.error('Add medicines error:', err);
+                    });
+            } catch (err) {
+                showError('Operation error: ' + err.message);
+                console.error(err);
+            }
+        }
+
+        // Close modal on background click
+        document.getElementById('confirmation-modal').addEventListener('click', function(e) {
+            try {
+                if (e.target === this) {
+                    closeConfirmationModal();
+                }
+            } catch (err) {
+                console.error('Modal click error:', err);
+            }
+        });
+    </script>
+
+</body>
+
+</html>

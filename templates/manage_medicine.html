@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Manage Medicine</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<!-- ✅ SUCCESS TOAST -->
+{% if messages %}
+  <div id="toast">
+    {% for message in messages %}
+      {{ message }}
+    {% endfor %}
+  </div>
+{% endif %}
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="title">Manage Medicine</div>
+</div>
+
+<div class="screen">
+
+{% if medicines %}
+  {% for med in medicines %}
+    <div class="medicine-card">
+
+      <!-- HEADER -->
+      <div class="card-header">
+        <h3>{{ med.name }}</h3>
+        <span class="status {{ med.status }}">{{ med.status|capfirst }}</span>
+      </div>
+
+      <!-- FREQUENCY -->
+      <div class="card-row">
+        <strong>Frequency:</strong>
+        {% if med.frequency_type == 'daily' %}
+          Daily
+        {% elif med.frequency_type == 'weekly' %}
+          Weekly
+        {% else %}
+          Custom Days
+        {% endif %}
+      </div>
+
+      <!-- DAYS -->
+      {% if med.frequency_type != 'daily' and med.days_of_week %}
+        <div class="card-row">
+          <strong>Days:</strong> {{ med.days_of_week }}
+        </div>
+      {% endif %}
+
+      <!-- TIMES -->
+      <div class="card-row">
+        <strong>Times:</strong>
+        <div class="time-chips">
+          {% for t in med.times.all %}
+            <span class="chip">{{ t.time }}</span>
+          {% empty %}
+            <span class="chip muted">No time set</span>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- FOOD -->
+      <div class="card-row">
+        <strong>Food:</strong> {{ med.food_timing }}
+      </div>
+
+      <!-- ACTION BUTTONS -->
+      <div class="card-actions">
+
+        {% if med.status == 'active' %}
+          <a href="{% url 'pause_medicine' med.id %}" class="btn pause">
+            Pause
+          </a>
+        {% else %}
+          <a href="{% url 'resume_medicine' med.id %}" class="btn resume">
+            Resume
+          </a>
+        {% endif %}
+
+        <!-- ✅ EDIT BUTTON -->
+        <button class="btn edit"
+                data-id="{{ med.id }}"
+                onclick="openEditModal(this)">
+          Edit
+        </button>
+
+        <!-- DELETE -->
+        <a href="{% url 'delete_medicine' med.id %}"
+           class="btn delete"
+           onclick="return confirm('Are you sure you want to delete this medicine?')">
+           Delete
+        </a>
+      </div>
+
+    </div>
+  {% endfor %}
+{% else %}
+  <p class="empty">No medicines added yet</p>
+{% endif %}
+
+</div>
+
+<!-- ✅ EDIT MEDICINE MODAL (NO FORM HERE) -->
+<div id="editModal" class="modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Edit Medicine</h3>
+      <button onclick="closeEditModal()">✕</button>
+    </div>
+
+    <!-- AJAX FORM LOADS HERE -->
+    <div id="edit-form-body"></div>
+  </div>
+</div>
+
+<!-- JS -->
+<script src="/static/script.js"></script>
+
+</body>
+</html>
+
+
+

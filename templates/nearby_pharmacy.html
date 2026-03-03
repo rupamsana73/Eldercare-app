@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Nearby Pharmacies</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            text-decoration: none;
+            color: #4a90e2;
+            font-weight: bold;
+        }
+
+        .pharmacy-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .pharmacy-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .pharmacy-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .pharmacy-info {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .distance {
+            display: inline-block;
+            background: #e1f5fe;
+            color: #0288d1;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .direction-btn {
+            display: block;
+            width: 100%;
+            text-align: center;
+            background: #4caf50;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        #status {
+            text-align: center;
+            margin-top: 50px;
+            color: #666;
+        }
+
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error-box {
+            background: #ffebee;
+            color: #c62828;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="top-bar">
+        <div class="title">Nearby Pharmacies</div>
+    </div>
+
+    <div class="container">
+        <a href="{% url 'dashboard' %}" class="back-btn">← Back to Dashboard</a>
+
+        <div id="main-content">
+            <div id="status">
+                <div class="loader"></div>
+                <p>Finding your location...</p>
+            </div>
+            <div id="pharmacy-list"></div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const CONFIG = {
+            RADIUS_METERS: 10000,
+            MAX_RESULTS: 15,
+            API_TIMEOUT: 10000,
+            OVERPASS_API: 'https://overpass-api.de/api/interpreter'
+        };
+
+        // State management
+        let requestInProgress = false;
+        let abortController = null;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeGeolocation();
+        });
+
+        function initializeGeolocation() {
+            if (!("geolocation" in navigator)) {
+                showError("Geolocation is not supported by your browser.", true);
+                return;
+            }
+
+            requestGeolocation();
+        }
+
+        function requestGeolocation() {
+            if (requestInProgress) return;
+
+            requestInProgress = true;
+            updateStatus("Finding your location...");
+
+            navigator.geolocation.getCurrentPosition(
+                function (position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+
+                    // Validate coordinates
+                    if (!isValidCoordinate(lat, lon)) {
+                        requestInProgress = false;
+                        showError("Invalid location data received.", true);
+                        return;
+                    }
+
+                    fetchPharmacies(lat, lon);
+                },
+                function (error) {
+                    requestInProgress = false;
+
+                    // Handle specific geolocation errors
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+                            showError("Location permission denied. Please enable location access in your browser settings.", true);
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            showError("Your location could not be determined. Please try again.", true);
+                            break;
+                        case error.TIMEOUT:
+                            showError("Location request timed out. Please try again.", true);
+                            break;
+                        default:
+                            showError("An unknown error occurred while accessing your location.", true);
+                    }
+                },
+                {
+                    enableHighAccuracy: false,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        }
+
+        function isValidCoordinate(lat, lon) {
+            return typeof lat === 'number' &&
+                   typeof lon === 'number' &&
+                   lat >= -90 && lat <= 90 &&
+                   lon >= -180 && lon <= 180 &&
+                   !isNaN(lat) && !isNaN(lon);
+        }
+
+        async function fetchPharmacies(lat, lon) {
+            // Prevent multiple simultaneous requests
+            if (requestInProgress) return;
+            requestInProgress = true;
+
+            updateStatus("Searching for nearby pharmacies...");
+
+            // Create abort controller for fetch timeout
+            abortController = new AbortController();
+            const timeoutId = setTimeout(() => abortController.abort(), CONFIG.API_TIMEOUT);
+
+            try {
+                const query = `[out:json];node["amenity"="pharmacy"](around:${CONFIG.RADIUS_METERS},${lat},${lon});out body;`;
+                const url = CONFIG.OVERPASS_API + "?data=" + encodeURIComponent(query);
+
+                const response = await fetch(url, {
+                    signal: abortController.signal,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    throw new Error(`API returned status ${response.status}`);
+                }
+
+                let data;
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    throw new Error("Invalid JSON response from pharmacy API");
+                }
+
+                // Validate API response
+                if (!data || typeof data !== 'object') {
+                    throw new Error("Invalid API response structure");
+                }
+
+                const elements = Array.isArray(data.elements) ? data.elements : [];
+
+                if (elements.length === 0) {
+                    requestInProgress = false;
+                    showError("No pharmacies found within 10 km of your location.", true);
+                    return;
+                }
+
+                displayPharmacies(elements, lat, lon);
+            } catch (error) {
+                clearTimeout(timeoutId);
+                requestInProgress = false;
+
+                let errorMsg = "Failed to fetch nearby pharmacies. ";
+
+                if (error.name === 'AbortError') {
+                    errorMsg += "Request timed out. Please check your connection and try again.";
+                } else if (error instanceof TypeError) {
+                    errorMsg += "Network error. Please check your internet connection.";
+                } else {
+                    errorMsg += error.message || "Please try again later.";
+                }
+
+                showError(errorMsg, true);
+            }
+        }
+
+        function displayPharmacies(elements, userLat, userLon) {
+            const list = document.getElementById('pharmacy-list');
+            const statusEl = document.getElementById('status');
+
+            // Clear previous results
+            list.innerHTML = '';
+            if (statusEl) statusEl.style.display = 'none';
+
+            // Calculate distances and remove duplicates
+            const pharmacyMap = new Map();
+
+            elements.forEach(el => {
+                // Validate element has required fields
+                if (!el.lat || !el.lon || !el.tags) return;
+
+                // Calculate distance
+                el.distance = calculateDistance(userLat, userLon, el.lat, el.lon);
+
+                // Use pharmacy name as deduplication key
+                const name = el.tags.name || `Pharmacy (${el.lat.toFixed(4)}, ${el.lon.toFixed(4)})`;
+                const key = name.toLowerCase().trim();
+
+                // Keep only the closest instance of each pharmacy
+                if (!pharmacyMap.has(key) || el.distance < pharmacyMap.get(key).distance) {
+                    pharmacyMap.set(key, el);
+                }
+            });
+
+            // Convert map to array and sort by distance
+            const uniquePharmacies = Array.from(pharmacyMap.values());
+            uniquePharmacies.sort((a, b) => a.distance - b.distance);
+
+            // Limit to max results
+            const displayPharmacies = uniquePharmacies.slice(0, CONFIG.MAX_RESULTS);
+
+            if (displayPharmacies.length === 0) {
+                showError("No valid pharmacies found nearby.", true);
+                return;
+            }
+
+            // Render pharmacy cards
+            displayPharmacies.forEach(pharmacy => {
+                const card = createPharmacyCard(pharmacy);
+                if (card) {
+                    list.appendChild(card);
+                }
+            });
+
+            requestInProgress = false;
+        }
+
+        function createPharmacyCard(pharmacy) {
+            try {
+                const name = pharmacy.tags?.name || "Pharmacy";
+                const address = pharmacy.tags?.["addr:street"] || pharmacy.tags?.["addr:full"] || "Address not available";
+                const distStr = formatDistance(pharmacy.distance);
+
+                const card = document.createElement('div');
+                card.className = 'pharmacy-card';
+
+                // Sanitize values to prevent XSS
+                const safeName = name.replace(/[<>]/g, '');
+                const safeAddress = address.replace(/[<>]/g, '');
+
+                card.innerHTML = `
+                    <div class="pharmacy-name">${safeName}</div>
+                    <div class="pharmacy-info">${safeAddress}</div>
+                    <div class="distance">${distStr} away</div>
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=${pharmacy.lat},${pharmacy.lon}" 
+                       target="_blank" class="direction-btn" rel="noopener noreferrer">Get Directions</a>
+                `;
+
+                return card;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function formatDistance(distanceKm) {
+            if (distanceKm < 1) {
+                return Math.round(distanceKm * 1000) + " m";
+            } else {
+                return distanceKm.toFixed(1) + " km";
+            }
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            // Haversine formula for accurate distance calculation
+            const R = 6371; // Earth's radius in kilometers
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+        }
+
+        function updateStatus(msg) {
+            const statusEl = document.getElementById('status');
+            if (statusEl) {
+                statusEl.innerHTML = `
+                    <div class="loader"></div>
+                    <p>${msg}</p>
+                `;
+                statusEl.style.display = 'block';
+            }
+        }
+
+        function showError(msg, showRetry = false) {
+            const mainContent = document.getElementById('main-content');
+            const list = document.getElementById('pharmacy-list');
+            const statusEl = document.getElementById('status');
+
+            if (statusEl) statusEl.style.display = 'none';
+            if (list) list.innerHTML = '';
+
+            const retryButton = showRetry ? `
+                <button onclick="handleRetry()" style="margin-top:15px; padding:10px 20px; border:none; border-radius:8px; background:#4a90e2; color:white; cursor:pointer; font-weight:bold;">Try Again</button>
+            ` : '';
+
+            if (mainContent) {
+                mainContent.innerHTML = `
+                    <div class="error-box">
+                        <h3>⚠️ Oops!</h3>
+                        <p>${msg}</p>
+                        ${retryButton}
+                    </div>
+                `;
+            }
+
+            requestInProgress = false;
+        }
+
+        function handleRetry() {
+            requestInProgress = false;
+            const mainContent = document.getElementById('main-content');
+            if (mainContent) {
+                mainContent.innerHTML = `
+                    <div id="status">
+                        <div class="loader"></div>
+                        <p>Finding your location...</p>
+                    </div>
+                    <div id="pharmacy-list"></div>
+                `;
+            }
+            requestGeolocation();
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1772 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+/* ===== DASHBOARD HEADER (SAME AS MANAGE MEDICINE) ===== */
+.dashboard-header{
+  background:#0b3a5a;
+  color:#ffffff;
+  padding:14px 16px;
+  font-size:16px;
+  font-weight:600;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  box-shadow:0 4px 12px rgba(0,0,0,.15);
+  position:relative;
+}
+
+.header-title {
+  flex: 1;
+  text-align: center;
+}
+
+/* PROFILE DROPDOWN */
+.profile-dropdown {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  position: relative;
+}
+
+.profile-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid white;
+  object-fit: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.profile-avatar.default {
+  font-size: 20px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 50px;
+  right: 0;
+  background: white;
+  min-width: 280px;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.dropdown-menu.active {
+  display: block;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-header {
+  background: #f6f8fb;
+  padding: 16px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dropdown-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dropdown-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dropdown-avatar.default {
+  font-size: 24px;
+  background: #dbeafe;
+}
+
+.user-details h3 {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  color: #1f2937;
+}
+
+.user-details p {
+  margin: 0;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.dropdown-body {
+  padding: 12px 0;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: #1f2937;
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.2s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background: #f6f8fb;
+  color: #0b3a5a;
+}
+
+.dropdown-item.danger {
+  color: #dc2626;
+  border-top: 1px solid #e5e7eb;
+}
+
+.dropdown-item.danger:hover {
+  background: #fee2e2;
+}
+
+/* Overlay to close dropdown */
+.dropdown-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+}
+
+.dropdown-overlay.active {
+  display: block;
+}
+
+/* page wrapper */
+.dashboard-wrapper{
+  max-width:420px;
+  margin:0 auto;
+  background:#ffffff;
+  min-height:100vh;
+}
+
+/* ===== BASE ===== */
+:root{
+  --bg:#f6f8fb;
+  --card:#ffffff;
+  --text:#0f172a;
+  --muted:#6b7280;
+  --primary:#2563eb;
+  --success:#16a34a;
+  --warning:#f59e0b;
+  --shadow:0 8px 24px rgba(0,0,0,.06);
+  --radius:14px;
+}
+
+/* Dark mode colors */
+html.dark-mode {
+  --bg:#1a1a2e;
+  --card:#16213e;
+  --text:#ffffff;
+  --muted:#9ca3af;
+  --shadow:0 8px 24px rgba(0,0,0,.3);
+}
+
+/* Smooth transitions for theme switching */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* 🎨 Animation library */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(37, 99, 235, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(37, 99, 235, 0.6);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto;
+}
+
+.container{
+  padding:16px;
+}
+
+/* STATS */
+.stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+.stat-card{
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:14px;
+  box-shadow:var(--shadow);
+}
+.stat-card.success{border-left:6px solid var(--success)}
+.stat-card.warning{border-left:6px solid var(--warning)}
+.stat-label{color:var(--muted); font-size:13px}
+.stat-value{font-size:22px; font-weight:700}
+
+/* MED CARD */
+.med-card{
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:14px;
+  margin-bottom:12px;
+}
+.stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin-bottom:18px;
+}
+
+.stat-card{
+  background:var(--card);
+  border-radius:14px;
+  padding:14px;
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  min-height:72px;
+}
+
+.stat-label{
+  font-size:12px;
+  color:var(--muted);
+}
+
+.stat-value{
+  font-size:22px;
+  font-weight:700;
+  margin-top:4px;
+}
+.med-card{
+  background:var(--card);
+  border-radius:14px;
+  box-shadow:var(--shadow);
+  padding:14px;
+  margin-bottom:14px;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.med-card:hover{
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+.med-card.missed{
+  border-left:5px solid #dc2626;
+  animation: slideInRight 0.3s ease-out;
+}
+
+.med-card strong{
+  font-size:15px;
+}
+
+.med-card small{
+  font-size:12px;
+}
+
+/* 🆕 DRUG CLASSIFICATION BADGE */
+.drug-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: help;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.drug-badge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+/* 🆕 DRUG CLASSIFICATION AWARENESS PANEL */
+.drug-class-awareness {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, #f0f7ff 0%, #e6f2ff 100%);
+  border: 2px solid rgba(37, 99, 235, 0.2);
+}
+
+.drug-class-item {
+  background: white;
+  border-radius: 8px;
+  padding: 12px;
+  border-left: 4px solid #3b82f6;
+  transition: all 0.2s ease;
+}
+
+.drug-class-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.drug-class-name {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.drug-class-count {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0b3a5a;
+}
+
+/* 🆕 MARK AS TAKEN ANIMATION */
+.med-card.taken {
+  animation: markAsTakenAnimation 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes markAsTakenAnimation {
+  0% {
+    transform: scale(1);
+    background: var(--card);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+    border-left: 5px solid #16a34a;
+  }
+}
+
+/* 🆕 TAKEN BUTTON ANIMATION */
+.btn.taken {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.4);
+  animation: checkmarkAnimation 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+}
+
+@keyframes checkmarkAnimation {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 🆕 BUTTON TRANSITION STATES */
+.btn {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:not(.taken):not(.missed):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(11, 58, 90, 0.3);
+}
+
+.btn:not(.taken):not(.missed):active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(11, 58, 90, 0.2);
+}
+
+/* 🆕 MED CARD TRANSITION FOR TAKEN STATE */
+.med-card.taken .btn {
+  pointer-events: none;
+}
+
+.med-card {
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* 🆕 Advanced metric cards */
+.metrics-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+  animation: fadeInUp 0.6s ease-out 0.1s both;
+}
+
+@media (max-width: 480px) {
+  .metrics-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.metric-card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+  animation: scaleIn 0.4s ease-out;
+}
+
+.metric-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+}
+
+/* Health Score Card */
+.health-score-card {
+  grid-column: span 2;
+  background: linear-gradient(135deg, var(--card) 0%, rgba(37, 99, 235, 0.05) 100%);
+  border: 1px solid rgba(37, 99, 235, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.health-score-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.1) 0%, transparent 70%);
+  animation: pulse 3s ease-in-out infinite;
+}
+
+.health-score-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.health-score-circle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: white;
+  animation: glow 2s ease-in-out infinite;
+}
+
+.health-score-value {
+  font-size: 48px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.health-score-label {
+  font-size: 12px;
+  margin-top: 4px;
+  opacity: 0.9;
+}
+
+.health-score-info {
+  flex: 1;
+}
+
+.score-level {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.score-breakdown {
+  font-size: 12px;
+  color: var(--muted);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+@media (max-width: 480px) {
+  .health-score-card {
+    grid-column: span 1;
+  }
+}
+
+/* Streak Card */
+.streak-card {
+  position: relative;
+  border: 2px solid #fbbf24;
+  background: linear-gradient(135deg, var(--card) 0%, rgba(251, 191, 36, 0.03) 100%);
+}
+
+.streak-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: #f59e0b;
+  animation: slideInRight 0.5s ease-out;
+}
+
+.streak-label {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.streak-fire {
+  font-size: 24px;
+  display: inline-block;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+/* Adherence Card */
+.adherence-card {
+  background: linear-gradient(135deg, var(--card) 0%, rgba(34, 197, 94, 0.03) 100%);
+  border: 2px solid #86efac;
+}
+
+.adherence-percentage {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.adherence-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: #16a34a;
+}
+
+.adherence-bar {
+  flex: 1;
+  height: 4px;
+  background: #e5e7eb;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.adherence-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #16a34a, #22c55e);
+  animation: slideInRight 0.8s ease-out;
+  border-radius: 2px;
+}
+
+/* Activity Grid Enhancement */
+.activity-grid{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:6px;
+  margin-top:10px;
+  animation: fadeInUp 0.5s ease-out 0.2s both;
+}
+
+.day-box{
+  width:100%;
+  aspect-ratio:1/1;
+  border-radius:4px;
+  background:#e5e7eb;
+  cursor:help;
+  transition:all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border:1px solid #d1d5db;
+  position: relative;
+}
+
+.day-box:hover{
+  transform:scale(1.15);
+  box-shadow:0 8px 16px rgba(0,0,0,0.15);
+  z-index: 10;
+}
+
+.day-box::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.activity-grid{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:6px;
+  margin-top:10px;
+}
+
+.day-box{
+  width:100%;
+  aspect-ratio:1/1;
+  border-radius:4px;
+  background:#e5e7eb;
+}
+/* ===== MISSED BUTTON ===== */
+.btn.missed{
+  background:#dc2626;        /* red-600 */
+  color:#fff;
+  cursor:not-allowed;
+  animation:pulseMiss 1.4s infinite;
+}
+
+@keyframes pulseMiss{
+  0%   { box-shadow:0 0 0 0 rgba(220,38,38,.5); }
+  70%  { box-shadow:0 0 0 10px rgba(220,38,38,0); }
+  100% { box-shadow:0 0 0 0 rgba(220,38,38,0); }
+}
+
+/* missed card slight red tint */
+.med-card.missed{
+  border-left:5px solid #dc2626;
+}
+
+.activity-grid{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:6px;
+  margin-top:10px;
+}
+
+.activity-grid{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:6px;
+  margin-top:10px;
+}
+
+.day-box{
+  width:100%;
+  aspect-ratio:1/1;
+  border-radius:4px;
+  background:#e5e7eb;
+  cursor:help;
+  transition:all 0.3s ease;
+  border:1px solid #d1d5db;
+}
+
+.day-box:hover{
+  transform:scale(1.1);
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Activity states with proper colors */
+.day-box.day-none{
+  background:#e5e7eb;
+  opacity:0.5;
+}
+
+.day-box.day-partial{
+  background:#fbbf24;
+  border-color:#f59e0b;
+}
+
+.day-box.day-full{
+  background:#22c55e;
+  animation: slideInRight 0.3s ease-out;
+  border-color:#16a34a;
+}
+
+.day-box.day-missed{
+  background:#ef4444;
+  animation: slideInRight 0.3s ease-out;
+  border-color:#dc2626;
+}
+
+/* Backward compatibility classes */
+.day-box.active-1{background:#fbbf24;}
+.day-box.active-2{background:#22c55e;}
+.day-box.active-3{background:#16a34a;}
+
+/* Tooltip styling */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  background-color: var(--text);
+  color: var(--card);
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px 12px;
+  position: absolute;
+  z-index: 100;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -60px;
+  width: 120px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.tooltip .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: var(--text) transparent transparent transparent;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
+@media (max-width: 600px) {
+  .day-box{
+    border-radius: 3px;
+  }
+  
+  .day-box:hover{
+    transform: scale(1.2);
+  }
+
+  /* Mobile responsive metrics */
+  .metrics-container {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .health-score-card {
+    grid-column: span 1;
+  }
+
+  .health-score-display {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .health-score-circle {
+    width: 80px;
+    height: 80px;
+  }
+
+  .health-score-value {
+    font-size: 36px;
+  }
+
+  .health-score-info {
+    width: 100%;
+  }
+
+  .score-breakdown {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Mobile stats */
+  .stats {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+
+  .stat-card {
+    padding: 12px;
+    min-height: 60px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+  }
+
+  .stat-value {
+    font-size: 18px;
+  }
+
+  /* Mobile cards */
+  .med-card {
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+
+  .metric-card {
+    padding: 14px;
+  }
+
+  /* Mobile activity grid */
+  .activity-grid {
+    gap: 5px;
+  }
+
+  .tooltip .tooltiptext {
+    width: 100px;
+    margin-left: -50px;
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+
+  /* Mobile header */
+  .dashboard-header {
+    padding: 12px 14px;
+  }
+
+  /* Dropdown adjustments */
+  .dropdown-menu {
+    min-width: 250px;
+    right: -10px;
+  }
+
+  /* Hide overflow on small screens */
+  .dashboard-wrapper {
+    max-width: 100%;
+  }
+
+  /* Ensure buttons are touch-friendly */
+  .btn {
+    min-height: 44px;
+    font-size: 14px;
+  }
+
+  /* Mobile graph card */
+  .graph-card {
+    padding: 12px;
+  }
+
+  .graph-card h4 {
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+
+  .graph-card .muted {
+    font-size: 11px;
+  }
+}
+
+/* Tablet responsive rules (600px - 900px) */
+@media (min-width: 601px) and (max-width: 900px) {
+  .metrics-container {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .health-score-card {
+    grid-column: span 2;
+  }
+
+  .stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .activity-grid {
+    gap: 7px;
+  }
+}
+
+/* Large screen rules (900px+) */
+@media (min-width: 901px) {
+  .dashboard-wrapper {
+    max-width: 500px;
+  }
+
+  .metrics-container {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .health-score-card {
+    grid-column: span 2;
+  }
+}
+
+/* Print styles for accessibility */
+@media print {
+  .dashboard-header,
+  .profile-dropdown,
+  .dropdown-menu,
+  #dark-mode-toggle {
+    display: none;
+  }
+
+  .med-card,
+  .metric-card {
+    page-break-inside: avoid;
+  }
+}
+
+
+
+
+</style>
+</head>
+<div class="dashboard-wrapper">
+
+  <div class="dashboard-header">
+    <div class="header-title">Your Dashboard</div>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <!-- Dark mode toggle -->
+      <button id="dark-mode-toggle" onclick="toggleDarkMode()" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer;" title="Toggle dark mode">
+        🌙
+      </button>
+      <div class="profile-dropdown" id="profile-dropdown-btn" onclick="toggleDropdown()">
+        {% if user.profile.has_profile_image %}
+          <div class="profile-avatar">
+            <img src="{{ user.profile.get_profile_image_url }}" alt="Profile">
+          </div>
+        {% else %}
+          <div class="profile-avatar default">👤</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- DROPDOWN OVERLAY -->
+  <div class="dropdown-overlay" id="dropdown-overlay" onclick="closeDropdown()"></div>
+
+  <!-- DROPDOWN MENU -->
+  <div class="dropdown-menu" id="dropdown-menu">
+    <div class="dropdown-header">
+      {% if user.profile.has_profile_image %}
+        <div class="dropdown-avatar">
+          <img src="{{ user.profile.get_profile_image_url }}" alt="Profile">
+        </div>
+      {% else %}
+        <div class="dropdown-avatar default">👤</div>
+      {% endif %}
+      <div class="user-details">
+        <h3>{{ user.first_name|default:user.username }}</h3>
+        <p>{{ user.email|default:"No email" }}</p>
+      </div>
+    </div>
+    <div class="dropdown-body">
+      <a href="{% url 'profile' %}" class="dropdown-item">👤 View Profile</a>
+      <a href="{% url 'profile_edit' %}" class="dropdown-item">✏️ Edit Profile</a>
+      <a href="{% url 'logout' %}" class="dropdown-item danger">🚪 Logout</a>
+    </div>
+  </div>
+
+  <div class="container">
+
+<body>
+  <!-- bridges -->
+  <input type="hidden" id="csrf-token" value="{{ csrf_token }}">
+  <input type="hidden" id="toggle-url" value="{% url 'toggle_medicine_status' %}">
+
+  <main class="container">
+
+    <!-- TOP STATS -->
+    <section class="stats">
+      <div class="stat-card">
+        <span class="stat-label">Today</span>
+        <span class="stat-value">{{ today_data|length }}</span>
+      </div>
+
+      <div class="stat-card success">
+        <span class="stat-label">Completed</span>
+        <span class="stat-value">{{ completed_count }}</span>
+      </div>
+
+      <div class="stat-card warning">
+        <span class="stat-label">Missed</span>
+        <span class="stat-value">{{ missed_count|default:"0" }}</span>
+      </div>
+    </section>
+
+    <!-- 🆕 ADVANCED METRICS SECTION -->
+    <section class="metrics-container">
+      <!-- Health Score Card -->
+      {% if health_score %}
+      <div class="metric-card health-score-card">
+        <div class="health-score-display">
+          <div class="health-score-circle" style="background: {{ health_score.color }};" data-health-color>
+            <div class="health-score-value" data-health-score>{{ health_score.score }}</div>
+            <div class="health-score-label">Score</div>
+          </div>
+          <div class="health-score-info">
+            <div class="score-level">
+              <strong data-health-level>{{ health_score.level }}</strong>
+            </div>
+            <div class="score-breakdown">
+              <div>
+                <strong>7d:</strong> <span data-breakdown-7d>{{ health_score.breakdown.adherence_7d|default:"0" }}</span>%
+              </div>
+              <div>
+                <strong>30d:</strong> <span data-breakdown-30d>{{ health_score.breakdown.adherence_30d|default:"0" }}</span>%
+              </div>
+              <div>
+                <strong>Streak:</strong> {{ streaks.current_streak|default:"0" }}d
+              </div>
+              <div>
+                <strong>Best:</strong> {{ streaks.best_streak|default:"0" }}d
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Current Streak Card -->
+      {% if streaks %}
+      <div class="metric-card streak-card">
+        <div style="text-align: center;">
+          <div class="streak-fire">🔥</div>
+          <div class="streak-value">{{ streaks.current_streak|default:"0" }}</div>
+          <div class="streak-label">Current Streak (days)</div>
+          <div style="font-size: 11px; margin-top: 8px; color: var(--muted);">
+            Best: {{ streaks.best_streak|default:"0" }} days
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Adherence Card -->
+      {% if daily_adherence %}
+      <div class="metric-card adherence-card">
+        <div style="margin-bottom: 12px;">
+          <strong style="font-size: 14px;">7-Day Adherence</strong>
+        </div>
+        <div class="adherence-percentage">
+          <div class="adherence-value">{{ daily_adherence.average|default:"0" }}%</div>
+          <div class="adherence-bar">
+            <div class="adherence-fill" style="width: {{ daily_adherence.average|default:'0' }}%;"></div>
+          </div>
+        </div>
+        <div style="font-size: 11px; margin-top: 8px; color: var(--muted);">
+          {{ daily_adherence.completed_doses|default:"0" }} of {{ daily_adherence.total_doses|default:"0" }} doses
+        </div>
+      </div>
+      {% endif %}
+    </section>
+
+    <!-- ACTIVITY / GRAPH PLACEHOLDER -->
+<section class="graph-card">
+  <h4>Activity Heatmap</h4>
+  <p class="muted">Last 28 days • Hover for details</p>
+
+  <div class="activity-grid">
+    {% if activity_data %}
+      {% for day in activity_data %}
+        <div class="tooltip">
+          <span class="day-box day-{{ day.state|default:'none' }}"></span>
+          <span class="tooltiptext">
+            {% if day.state == 'full' %}✓ {{ day.date }}: Complete ({{ day.taken }})
+            {% elif day.state == 'partial' %}⊙ {{ day.date }}: Partial ({{ day.taken }})
+            {% elif day.state == 'missed' %}✗ {{ day.date }}: Missed
+            {% else %}— {{ day.date }}: No meds
+            {% endif %}
+          </span>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p class="muted" style="text-align: center; padding: 20px;">No activity data available</p>
+    {% endif %}
+  </div>
+</section>
+
+
+
+<!-- 🆕 DRUG CLASSIFICATION AWARENESS PANEL -->
+{% if drug_classification_stats %}
+<section class="metrics-container">
+  <div class="metric-card drug-class-awareness">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
+      <span style="font-size:20px;">💊</span>
+      <h3 style="margin:0; font-size:16px; color:#0b3a5a;">Drug Classification</h3>
+    </div>
+    
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+      {% for classification, count in drug_classification_stats.items %}
+        <div class="drug-class-item">
+          <div class="drug-class-name">{{ classification }}</div>
+          <div class="drug-class-count">{{ count }}</div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div style="border-top:1px solid #e2e8f0; margin-top:12px; padding-top:12px; font-size:12px; color:#6b7280;">
+      <strong>💡 Tip:</strong> Grouping similar medicines helps monitor potential interactions and side effects.
+    </div>
+  </div>
+</section>
+{% endif %}
+
+   <!-- TODAY LIST -->
+<section class="list">
+  <h3 style="margin:18px 0 12px;font-size:16px;">
+    Today’s Medicines
+  </h3>
+
+  {% for item in today_data %}
+    {% if item.dose_log %}
+      <div class="med-card 
+       {% if item.status == 'Taken' %}taken{% endif %}
+       {% if item.status == 'Missed' %}missed{% endif %}"
+       data-dose-id="{{ item.dose_log.id }}">
+
+        <div class="med-left">
+          <div style="display:flex; align-items:start; justify-content:space-between; gap:12px; margin-bottom:8px;">
+            <h3>{{ item.medicine.name|default:"Unknown Medicine" }}</h3>
+            {% if item.medicine.drug_classification and item.medicine.drug_classification != 'Unclassified' %}
+              <span class="drug-badge" title="Classification: {{ item.medicine.drug_classification }}">
+                {{ item.medicine.drug_classification|truncatewords:2 }}
+              </span>
+            {% endif %}
+          </div>
+
+          <div class="times">
+            <span class="pill">{{ item.scheduled_time|default:"--:--" }}</span>
+            {% if item.is_overdue %}
+              <span class="pill" style="background:#dc2626; color:white; margin-left:6px;">OVERDUE</span>
+            {% endif %}
+          </div>
+
+          {% if item.status == 'Pending' %}
+            <small class="muted">Scheduled for {{ item.scheduled_time|time:"H:i" }}</small>
+          {% elif item.status == 'Taken' %}
+            <small class="ok">
+              ✓ Taken at {{ item.actual_taken_time|time:"H:i"|default:item.dose_log.marked_at|time:"H:i" }}
+              {% if item.timing_info.status_badge %}
+                <span style="display:block; margin-top:4px; font-size:12px;">
+                  {% if item.timing_info.is_early %}
+                    <span style="color:#059669; background:#d1fae5; padding:2px 6px; border-radius:3px; font-weight:600;">
+                      ⚡ {{ item.timing_info.status_badge }}
+                    </span>
+                  {% elif item.timing_info.is_late %}
+                    <span style="color:#dc2626; background:#fee2e2; padding:2px 6px; border-radius:3px; font-weight:600;">
+                      🕐 {{ item.timing_info.status_badge }}
+                    </span>
+                  {% else %}
+                    <span style="color:#0891b2; background:#cffafe; padding:2px 6px; border-radius:3px; font-weight:600;">
+                      ✓ {{ item.timing_info.status_badge }}
+                    </span>
+                  {% endif %}
+                </span>
+              {% endif %}
+            </small>
+          {% elif item.status == 'Missed' %}
+            <small style="color:#dc2626;">✗ Marked as Missed</small>
+          {% endif %}
+        </div>
+
+        <div class="med-right">
+          {% if item.status == 'Taken' %}
+            <button class="btn taken" disabled>✓ Taken</button>
+
+          {% elif item.status == 'Missed' %}
+           <button class="btn missed" disabled>Missed</button>
+
+          {% else %}
+            <button class="btn" data-dose-id="{{ item.dose_log.id }}">
+              Mark as Taken
+            </button>
+          {% endif %}
+        </div>
+
+      </div>
+    {% endif %}
+  {% empty %}
+    <p class="muted" style="text-align: center; padding: 20px;">No medicines scheduled for today.</p>
+  {% endfor %}
+</section>
+
+  </main>
+
+  <!-- HARDENED AJAX SCRIPT WITH ERROR HANDLING -->
+  <script>
+    // CSRF Token handling for AJAX
+    const csrfToken = document.getElementById("csrf-token")?.value || '';
+    const toggleUrl = document.getElementById("toggle-url")?.value || '';
+
+    // Validate required elements exist
+    if (!csrfToken || !toggleUrl) {
+      console.error('Required AJAX configuration missing');
+    }
+
+    /**
+     * Toggle medicine status with proper error handling
+     */
+    document.querySelectorAll('.btn[data-dose-id]').forEach(btn => {
+      btn.addEventListener('click', function (event) {
+        event.preventDefault();
+        
+        const doseLogId = this.dataset.doseId;
+        const button = this;
+        
+        // Validate dose log ID
+        if (!doseLogId) {
+          console.error('Invalid dose log ID');
+          alert('Error: Invalid dose log ID');
+          return;
+        }
+
+        // Disable button during request
+        button.disabled = true;
+        const originalText = button.textContent;
+        button.textContent = 'Loading...';
+
+        // Make AJAX request with proper error handling
+        fetch(toggleUrl, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": csrfToken,
+            "X-Requested-With": "XMLHttpRequest"
+          },
+          body: new URLSearchParams({
+            'dose_log_id': doseLogId,
+            'csrfmiddlewaretoken': csrfToken
+          }),
+          credentials: 'same-origin'
+        })
+        .then(response => {
+          // Check HTTP response status
+          if (!response.ok) {
+            if (response.status === 404) {
+              throw new Error('Dose not found');
+            } else if (response.status === 403) {
+              throw new Error('Access denied');
+            } else if (response.status === 400) {
+              throw new Error('Invalid request');
+            } else {
+              throw new Error(`HTTP Error: ${response.status}`);
+            }
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Validate response data
+          if (!data || typeof data.success === 'undefined') {
+            throw new Error('Invalid server response');
+          }
+
+          if (data.success) {
+            // Get the medicine card
+            const medCard = button.closest('.med-card');
+            
+            // Update button state safely
+            if (data.status === 'Taken') {
+              button.textContent = "✓ Taken";
+              button.classList.add("taken");
+              button.disabled = true;
+              
+              // Add timing badge if available
+              if (data.timing_info && data.timing_info.status_badge) {
+                const medLeft = medCard ? medCard.querySelector('.med-left small') : null;
+                if (medLeft) {
+                  const badgeElement = document.createElement('span');
+                  badgeElement.style.cssText = 'display:block; margin-top:4px; font-size:12px;';
+                  
+                  if (data.timing_info.is_early) {
+                    badgeElement.innerHTML = `<span style="color:#059669; background:#d1fae5; padding:2px 6px; border-radius:3px; font-weight:600;">⚡ ${data.timing_info.status_badge}</span>`;
+                  } else if (data.timing_info.is_late) {
+                    badgeElement.innerHTML = `<span style="color:#dc2626; background:#fee2e2; padding:2px 6px; border-radius:3px; font-weight:600;">🕐 ${data.timing_info.status_badge}</span>`;
+                  } else {
+                    badgeElement.innerHTML = `<span style="color:#0891b2; background:#cffafe; padding:2px 6px; border-radius:3px; font-weight:600;">✓ ${data.timing_info.status_badge}</span>`;
+                  }
+                  medLeft.appendChild(badgeElement);
+                }
+              }
+              
+              // Add animation to med card
+              if (medCard) {
+                medCard.classList.add('taken');
+                // Trigger animation
+                medCard.offsetHeight; // Force reflow
+              }
+            } else {
+              button.textContent = "Mark as Taken";
+              button.classList.remove("taken");
+              button.disabled = false;
+              
+              // 🆕 Remove animation class from med card
+              if (medCard) {
+                medCard.classList.remove('taken');
+              }
+            }
+            
+            // Update adherence metrics if available
+            if (data.adherence) {
+              updateAdherenceDisplay(data.adherence);
+            }
+            
+            // Update health score if available
+            if (data.health_score) {
+              updateHealthScoreDisplay(data.health_score);
+            }
+            
+            // Update dose counts in dashboard
+            const takenCount = document.querySelector('[data-doses-taken]');
+            const pendingCount = document.querySelector('[data-doses-pending]');
+            if (takenCount) {
+              takenCount.textContent = (parseInt(takenCount.textContent) || 0) + 1;
+            }
+            if (pendingCount) {
+              const current = parseInt(pendingCount.textContent) || 0;
+              pendingCount.textContent = Math.max(0, current - 1);
+            }
+            
+            // Optional: Show success message
+            console.log('Medicine status updated', data.message || '');
+          } else {
+            throw new Error(data.error || 'Failed to update status');
+          }
+        })
+        .catch(error => {
+          // Comprehensive error handling
+          console.error('AJAX Error:', error.message);
+          
+          // Restore button state
+          button.textContent = originalText;
+          button.disabled = false;
+          
+          // Show user-friendly error message
+          const errorMsg = error.message || 'Failed to update medicine status. Please try again.';
+          alert('Error: ' + errorMsg);
+        });
+      });
+    });
+
+    /**
+     * 🆕 Update adherence display when medicine status changes
+     */
+    function updateAdherenceDisplay(adherenceData) {
+      try {
+        // Update adherence percentage
+        const adherenceValue = adherenceData.average || 0;
+        const adherenceValueEl = document.querySelector('.adherence-value');
+        const adherenceFillEl = document.querySelector('.adherence-fill');
+        
+        if (adherenceValueEl) {
+          adherenceValueEl.textContent = adherenceValue + '%';
+        }
+        
+        if (adherenceFillEl) {
+          adherenceFillEl.style.width = adherenceValue + '%';
+        }
+
+        // Update daily adherence bars if they exist
+        if (adherenceData.daily && Array.isArray(adherenceData.daily)) {
+          adherenceData.daily.forEach((day, index) => {
+            const dayElement = document.querySelector(`[data-adherence-day="${index}"]`);
+            if (dayElement) {
+              const fillEl = dayElement.querySelector('.day-fill');
+              if (fillEl) {
+                fillEl.style.height = day.percentage + '%';
+              }
+            }
+          });
+        }
+
+        // Animate the update
+        if (adherenceValueEl) {
+          adherenceValueEl.style.animation = 'none';
+          setTimeout(() => {
+            adherenceValueEl.style.animation = 'pulse 0.5s ease-in-out';
+          }, 10);
+        }
+
+      } catch (e) {
+        console.error('Error updating adherence display:', e);
+      }
+    }
+
+    /**
+     * 🆕 Update health score display when medicine status changes
+     */
+    function updateHealthScoreDisplay(healthScore) {
+      try {
+        // Update main health score
+        const scoreEl = document.querySelector('[data-health-score]');
+        const levelEl = document.querySelector('[data-health-level]');
+        
+        if (scoreEl && healthScore.score !== undefined) {
+          scoreEl.textContent = healthScore.score;
+          scoreEl.style.animation = 'none';
+          setTimeout(() => {
+            scoreEl.style.animation = 'pulse 0.5s ease-in-out';
+          }, 10);
+        }
+        
+        if (levelEl && healthScore.level) {
+          levelEl.textContent = healthScore.level;
+          levelEl.className = 'level-badge-' + healthScore.level.toLowerCase();
+        }
+
+        // Update health color indicator if exists
+        const colorEl = document.querySelector('[data-health-color]');
+        if (colorEl && healthScore.color) {
+          colorEl.style.color = healthScore.color;
+        }
+
+        // Update breakdown if visible
+        if (healthScore.breakdown) {
+          const breakdown7d = document.querySelector('[data-breakdown-7d]');
+          const breakdown30d = document.querySelector('[data-breakdown-30d]');
+          
+          if (breakdown7d && healthScore.breakdown.adherence_7d) {
+            breakdown7d.textContent = Math.round(healthScore.breakdown.adherence_7d) + '%';
+          }
+          if (breakdown30d && healthScore.breakdown.adherence_30d) {
+            breakdown30d.textContent = Math.round(healthScore.breakdown.adherence_30d) + '%';
+          }
+        }
+
+      } catch (e) {
+        console.error('Error updating health score display:', e);
+      }
+    }
+
+    /**
+     * 🆕 Auto-refresh adherence data every 60 seconds
+     */
+    function startAutoRefresh() {
+      const adherenceUpdateUrl = '{% url "get_adherence_update" %}';
+      const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]')?.value || '';
+      
+      // Initial refresh on page load
+      refreshAdherenceData();
+      
+      // Set up 60-second interval
+      setInterval(refreshAdherenceData, 60000);
+      
+      function refreshAdherenceData() {
+        if (!adherenceUpdateUrl) {
+          console.warn('Adherence update URL not configured');
+          return;
+        }
+        
+        fetch(adherenceUpdateUrl, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: new URLSearchParams({
+            'csrfmiddlewaretoken': csrfToken
+          }),
+          credentials: 'same-origin'
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            // Update adherence percentage
+            const adherenceValue = data.today_adherence || 0;
+            const adherenceValueEl = document.querySelector('.adherence-value');
+            const adherenceFillEl = document.querySelector('.adherence-fill');
+            
+            if (adherenceValueEl) {
+              adherenceValueEl.textContent = adherenceValue + '%';
+            }
+            
+            if (adherenceFillEl) {
+              adherenceFillEl.style.width = adherenceValue + '%';
+            }
+            
+            // Update health score
+            if (data.health_score !== undefined) {
+              const scoreEl = document.querySelector('[data-health-score]');
+              if (scoreEl) {
+                scoreEl.textContent = data.health_score;
+              }
+            }
+            
+            if (data.health_level) {
+              const levelEl = document.querySelector('[data-health-level]');
+              if (levelEl) {
+                levelEl.textContent = data.health_level;
+                levelEl.className = 'level-badge-' + data.health_level.toLowerCase();
+              }
+            }
+            
+            // Update current streak
+            if (data.current_streak !== undefined) {
+              const streakEl = document.querySelector('[data-current-streak]');
+              if (streakEl) {
+                streakEl.textContent = data.current_streak;
+              }
+            }
+            
+            // Update dose counts
+            if (data.dose_counts) {
+              const takenEl = document.querySelector('[data-doses-taken]');
+              const missedEl = document.querySelector('[data-doses-missed]');
+              const pendingEl = document.querySelector('[data-doses-pending]');
+              
+              if (takenEl) takenEl.textContent = data.dose_counts.taken || 0;
+              if (missedEl) missedEl.textContent = data.dose_counts.missed || 0;
+              if (pendingEl) pendingEl.textContent = data.dose_counts.pending || 0;
+            }
+            
+            // Update weekly adherence chart if data available
+            if (data.daily_breakdown && Array.isArray(data.daily_breakdown)) {
+              data.daily_breakdown.forEach((day, index) => {
+                const dayElement = document.querySelector(`[data-adherence-day="${index}"]`);
+                if (dayElement) {
+                  const fillEl = dayElement.querySelector('.day-fill');
+                  if (fillEl) {
+                    fillEl.style.height = (day.percentage || 0) + '%';
+                  }
+                }
+              });
+            }
+          }
+        })
+        .catch(error => {
+          console.warn('Auto-refresh failed:', error.message);
+          // Silent fail - don't interrupt user experience
+        });
+      }
+    }
+
+    // Start auto-refresh when page loads
+    document.addEventListener('DOMContentLoaded', startAutoRefresh);
+
+    /**
+     * 🆕 Profile dropdown functionality
+    
+     */
+    function toggleDropdown() {
+      const menu = document.getElementById('dropdown-menu');
+      const overlay = document.getElementById('dropdown-overlay');
+      
+      if (menu && overlay) {
+        menu.classList.toggle('active');
+        overlay.classList.toggle('active');
+      }
+    }
+
+    function closeDropdown() {
+      const menu = document.getElementById('dropdown-menu');
+      const overlay = document.getElementById('dropdown-overlay');
+      
+      if (menu && overlay) {
+        menu.classList.remove('active');
+        overlay.classList.remove('active');
+      }
+    }
+
+    // Close dropdown when clicking outside or on menu items
+    document.addEventListener('click', function(event) {
+      const dropdown = document.getElementById('profile-dropdown-btn');
+      const menu = document.getElementById('dropdown-menu');
+      
+      if (dropdown && menu) {
+        if (!dropdown.contains(event.target) && !menu.contains(event.target)) {
+          closeDropdown();
+        }
+      }
+    });
+
+    /**
+     * 🆕 Dark mode toggle functionality
+     */
+    function toggleDarkMode() {
+      const html = document.documentElement;
+      const toggle = document.getElementById('dark-mode-toggle');
+      
+      // Toggle dark mode class
+      html.classList.toggle('dark-mode');
+      
+      // Save preference to localStorage
+      const isDarkMode = html.classList.contains('dark-mode');
+      localStorage.setItem('dark-mode', isDarkMode ? 'true' : 'false');
+      
+      // Update button text
+      if (toggle) {
+        toggle.textContent = isDarkMode ? '☀️' : '🌙';
+      }
+    }
+
+    // Initialize dark mode from localStorage
+    function initializeDarkMode() {
+      const savedMode = localStorage.getItem('dark-mode');
+      const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+      
+      // Use saved preference or system preference
+      const shouldBeDark = savedMode === 'true' || (!savedMode && !prefersLight);
+      
+      if (shouldBeDark) {
+        document.documentElement.classList.add('dark-mode');
+        const toggle = document.getElementById('dark-mode-toggle');
+        if (toggle) {
+          toggle.textContent = '☀️';
+        }
+      }
+    }
+
+    // Initialize dark mode on page load
+    document.addEventListener('DOMContentLoaded', initializeDarkMode);
+
+    /**
+     * 🆕 Advanced heatmap tooltip enhancements
+     */
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add smooth animations to metric cards
+      const metricCards = document.querySelectorAll('.metric-card');
+      metricCards.forEach((card, index) => {
+        card.style.animationDelay = (index * 0.1) + 's';
+      });
+
+      // Enhance activity heatmap with better interactions
+      const dayBoxes = document.querySelectorAll('.day-box');
+      dayBoxes.forEach(box => {
+        // Add ripple effect on click
+        box.addEventListener('click', function(e) {
+          const ripple = document.createElement('span');
+          ripple.style.position = 'absolute';
+          ripple.style.borderRadius = '50%';
+          ripple.style.background = 'rgba(255, 255, 255, 0.6)';
+          ripple.style.width = '10px';
+          ripple.style.height = '10px';
+          ripple.style.animation = 'pulse 0.8s ease-out';
+          
+          const rect = box.getBoundingClientRect();
+          ripple.style.left = (e.clientX - rect.left) + 'px';
+          ripple.style.top = (e.clientY - rect.top) + 'px';
+          
+          box.appendChild(ripple);
+          setTimeout(() => ripple.remove(), 800);
+        });
+
+        // Enhanced tooltip timing
+        box.addEventListener('mouseenter', function() {
+          this.parentElement.querySelector('.tooltiptext').style.transitionDelay = '0.1s';
+        });
+      });
+    });
+
+    /**
+     * 🆕 Smooth scroll for better UX
+     */
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+
+  </script>
+</body>
+
+</body>
+</html>
+ 
+
+

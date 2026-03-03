@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+        <div class="menu-icon" onclick="toggleMenu()">☰</div>
+        <div class="title">Elderly Care</div>
+    </div>
+
+    <div id="menuBox" class="menu-box">
+        <a href="{% url 'logout' %}">🚪Logout</a>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="dashboard">
+
+        <a href="/smart-dashboard/" class="tile">
+            <h3>Smart Dashboard</h3>
+            <p>Today’s medicines</p>
+        </a>
+
+        <a href="{% url 'reminder' %}" class="tile">
+            <h3>Reminder System</h3>
+            <p>Medicine alerts</p>
+        </a>
+
+        <a href="/medicine/add/" class="tile">
+            <h3>Add Medicine</h3>
+            <p>Add new medicine</p>
+        </a>
+
+
+        <a href="/medicine/manage/" class="tile">
+            <h3>Manage Medicine</h3>
+            <p>Edit / delete</p>
+        </a>
+
+
+        <a href="/prescription-reader/" class="tile">
+            <h3>Prescription Reader</h3>
+            <p>Upload prescription</p>
+        </a>
+
+        <a href="/emergency/" class="tile emergency">
+            <h3>Emergency Assistance</h3>
+            <p>Quick access to urgent help</p>
+        </a>
+
+
+        <a href="/quick-call/" class="tile">
+            <h3>One-Click Call</h3>
+            <p>Call family</p>
+        </a>
+
+        <a href="{% url 'nearby_pharmacy' %}" class="tile">
+            <h3>Nearby Medicine Shop</h3>
+            <p>Find pharmacy</p>
+        </a>
+
+    </div>
+    <!-- FOOTER -->
+    <footer class="footer">
+        <p>© 2026 Elderly Medicine Care</p>
+        <p class="footer-sub">
+            Safe • Simple • Elder Friendly
+        </p>
+    </footer>
+    <script src="/static/script.js"></script>
+
+</body>
+
+</html>

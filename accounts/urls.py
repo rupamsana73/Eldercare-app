@@ -1,0 +1,31 @@
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.home, name='home'),
+    path('login/', views.login_view, name='login'),
+    path('signup/', views.signup_view, name='signup'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+    path('profile/', views.profile_view, name='profile'),
+    path('profile/edit/', views.profile_edit_view, name='profile_edit'),
+    path('profile/photo/', views.profile_photo_upload_view, name='profile_photo_upload'),
+    path('emergency/', views.emergency, name='emergency'),
+    path('save-emergency/', views.save_emergency_contact),
+    path('logout/', views.logout_view, name='logout'),
+    path('medicine/add/', views.add_medicine, name='add_medicine'),
+    path('medicine/manage/', views.manage_medicine, name='manage_medicine'),
+    path('pause/<int:med_id>/', views.pause_medicine, name='pause_medicine'),
+    path('resume/<int:med_id>/', views.resume_medicine, name='resume_medicine'),
+    path('delete/<int:med_id>/', views.delete_medicine, name='delete_medicine'),
+    path('medicine/edit/<int:med_id>/', views.edit_medicine, name='edit_medicine'),
+    path('smart-dashboard/', views.smart_dashboard, name='smart_dashboard'),
+    path('medicine/toggle-status/', views.toggle_medicine_status, name='toggle_medicine_status'),
+    path('api/adherence-update/', views.get_adherence_update, name='get_adherence_update'),
+    path('reminder/', views.reminder_view, name='reminder'),
+    path('reminder/toggle-setting/', views.toggle_reminder_setting, name='toggle_reminder_setting'),
+    path('quick-call/', views.quick_call_view, name='quick_call'),
+    path('prescription-reader/', views.prescription_reader_view, name='prescription_reader'),
+    path('prescription-reader/process/', views.prescription_process, name='prescription_process'),
+    path('prescription-reader/add-medicines/', views.prescription_add_medicines, name='prescription_add_medicines'),
+    path('nearby-pharmacy/', views.nearby_pharmacy_view, name='nearby_pharmacy'),
+]

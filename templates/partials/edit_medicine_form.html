@@ -1,0 +1,57 @@
+<form id="editForm" method="post">
+  {% csrf_token %}
+
+  <div class="form-group">
+    <label>Medicine Name</label>
+    <input type="text" name="name" class="input" value="{{ med.name }}" required>
+  </div>
+
+  <div class="form-group">
+    <label>Frequency</label>
+    <select name="frequency_type" class="input">
+      <option value="daily" {% if med.frequency_type == 'daily' %}selected{% endif %}>Daily</option>
+      <option value="weekly" {% if med.frequency_type == 'weekly' %}selected{% endif %}>Weekly</option>
+      <option value="custom_week" {% if med.frequency_type == 'custom_week' %}selected{% endif %}>Custom Days</option>
+    </select>
+  </div>
+
+ <div class="form-group">
+  <label>Times</label>
+
+  <div id="edit-times-box">
+    {% for t in med.times.all %}
+      <input type="time"
+             name="times[]"
+             class="input"
+             value="{{ t.time|time:'H:i' }}">
+    {% empty %}
+      <input type="time" name="times[]" class="input">
+    {% endfor %}
+  </div>
+
+  <button type="button"
+          class="btn small add-time-btn"
+          onclick="addEditTime()">
+    + Add Time
+  </button>
+</div>
+
+
+
+  <div class="form-group">
+    <label>Food Timing</label>
+    <select name="food_timing" class="input">
+      <option value="Before Food" {% if med.food_timing == 'Before Food' %}selected{% endif %}>
+        Before Food
+      </option>
+      <option value="After Food" {% if med.food_timing == 'After Food' %}selected{% endif %}>
+        After Food
+      </option>
+    </select>
+  </div>
+
+  <div class="modal-actions">
+    <button type="submit" class="btn save">Save Changes</button>
+  </div>
+</form>
+

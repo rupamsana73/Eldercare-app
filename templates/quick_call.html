@@ -1,0 +1,789 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Quick Call</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* ===== CSS VARIABLES ===== */
+        :root {
+            --primary-dark: #1e3a5f;
+            --primary: #2563eb;
+            --success: #16a34a;
+            --success-light: #f0fdf4;
+            --warning: #ea580c;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.12);
+            --radius: 16px;
+            --radius-sm: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text-dark);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ===== HEADER ===== */
+        .dashboard-header {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
+            color: #ffffff;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(30, 58, 95, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            transition: background 0.2s ease;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .back-btn:active {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .header-title {
+            flex: 1;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .header-spacer {
+            width: 44px;
+        }
+
+        /* ===== WRAPPER ===== */
+        .dashboard-wrapper {
+            max-width: 480px;
+            margin: 0 auto;
+            background: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            padding: 24px 20px;
+            flex: 1;
+        }
+
+        /* ===== PAGE INTRO ===== */
+        .page-intro {
+            text-align: center;
+            margin-bottom: 28px;
+            animation: fadeInDown 0.6s ease;
+        }
+
+        .page-intro .icon {
+            font-size: 56px;
+            margin-bottom: 12px;
+            display: block;
+            animation: bounce 2s infinite;
+        }
+
+        .page-intro p {
+            margin: 0;
+            font-size: 15px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* ===== CONTACT CARD ===== */
+        .contact-item {
+            margin-bottom: 20px;
+            animation: fadeInUp 0.6s ease backwards;
+        }
+
+        .contact-item:nth-child(1) { animation-delay: 0.1s; }
+        .contact-item:nth-child(2) { animation-delay: 0.2s; }
+        .contact-item:nth-child(3) { animation-delay: 0.3s; }
+
+        .contact-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 20px;
+            border: 2px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .contact-card.priority-1 {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 20px rgba(37, 99, 235, 0.15), var(--shadow-lg);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact-card.priority-1::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .contact-card.priority-1::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.2) 0%, transparent 100%);
+            border-radius: 0 16px 0 100px;
+        }
+
+        .contact-card.priority-2,
+        .contact-card.priority-3 {
+            background: var(--card);
+            border: 2px solid var(--border);
+            box-shadow: var(--shadow);
+            padding: 18px;
+        }
+
+        .contact-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .contact-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e0e7ff 0%, #f3f4f6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .contact-card.priority-1 .contact-avatar {
+            width: 68px;
+            height: 68px;
+            font-size: 32px;
+            background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        .contact-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .contact-info h3 {
+            margin: 0 0 4px;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .contact-card.priority-1 .contact-info h3 {
+            font-size: 20px;
+            color: var(--primary-dark);
+        }
+
+        .contact-info .phone-number {
+            margin: 0 0 8px;
+            font-size: 14px;
+            color: var(--text-muted);
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.5px;
+        }
+
+        .priority-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .priority-badge.p1 {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+        }
+
+        .priority-badge.p2,
+        .priority-badge.p3 {
+            background: rgba(100, 116, 139, 0.1);
+            color: var(--text-muted);
+        }
+
+        /* ===== SWIPE TO CALL SLIDER ===== */
+        .swipe-container {
+            margin-top: 18px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .swipe-slider {
+            width: 100%;
+            height: 56px;
+            background: linear-gradient(90deg, #f1f5f9 0%, #e2e8f0 100%);
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            cursor: grab;
+            user-select: none;
+            -webkit-user-select: none;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .swipe-slider.active {
+            background: linear-gradient(90deg, #dcfce7 0%, #bbf7d0 100%);
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
+        }
+
+        .swipe-slider.completed {
+            background: linear-gradient(90deg, #16a34a 0%, #15803d 100%);
+        }
+
+        .swipe-text {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-muted);
+            pointer-events: none;
+            white-space: nowrap;
+            transition: opacity 0.3s ease;
+        }
+
+        .swipe-slider.active .swipe-text {
+            opacity: 0;
+        }
+
+        .swipe-slider.completed .swipe-text {
+            opacity: 0;
+        }
+
+        .swipe-track {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: rgba(22, 163, 74, 0.15);
+            border-radius: 28px;
+            transition: width 0.1s linear;
+            pointer-events: none;
+        }
+
+        .swipe-slider.completed .swipe-track {
+            background: rgba(22, 163, 74, 0.3);
+        }
+
+        .swipe-thumb {
+            width: 48px;
+            height: 48px;
+            background: #ffffff;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: grab;
+            user-select: none;
+            -webkit-user-select: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+            position: relative;
+            z-index: 10;
+            transition: all 0.15s ease;
+            flex-shrink: 0;
+        }
+
+        .swipe-thumb.dragging {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+        }
+
+        .swipe-slider.completed .swipe-thumb {
+            background: #16a34a;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+        }
+
+        .swipe-cue {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-top: 6px;
+            text-align: center;
+            transition: opacity 0.3s ease;
+        }
+
+        .swipe-slider.active ~ .swipe-cue {
+            opacity: 0;
+        }
+
+        /* ===== COPY BUTTON ===== */
+        .contact-actions {
+            margin-top: 16px;
+            display: flex;
+            gap: 10px;
+            position: relative;
+            z-index: 5;
+        }
+
+        .btn-copy {
+            flex: 1;
+            padding: 12px 16px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+
+        .btn-copy:active {
+            background: #e2e8f0;
+            transform: scale(0.96);
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 500px;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .empty-state .icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .empty-state h3 {
+            margin: 0 0 8px;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .empty-state p {
+            color: var(--text-muted);
+            font-size: 15px;
+            margin: 0 0 24px;
+            line-height: 1.6;
+        }
+
+        .add-contacts-btn {
+            display: inline-block;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
+            color: #fff;
+            border-radius: var(--radius-sm);
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(30, 58, 95, 0.2);
+        }
+
+        .add-contacts-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            color: #ffffff;
+            padding: 14px 24px;
+            border-radius: 28px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 8px 24px rgba(22, 163, 74, 0.3);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            z-index: 9999;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0);
+            }
+            50% {
+                transform: translate(20px, -20px);
+            }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 480px) {
+            .dashboard-wrapper {
+                max-width: 100%;
+                border-radius: 0;
+            }
+
+            .container {
+                padding: 20px 16px;
+            }
+
+            .header-title {
+                font-size: 18px;
+            }
+
+            .page-intro .icon {
+                font-size: 48px;
+            }
+
+            .contact-info h3 {
+                font-size: 16px;
+            }
+
+            .contact-card.priority-1 .contact-info h3 {
+                font-size: 18px;
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .dashboard-wrapper {
+                max-width: 480px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-wrapper">
+
+        <!-- HEADER -->
+        <div class="dashboard-header">
+            <a href="{% url 'dashboard' %}" class="back-btn">←</a>
+            <div class="header-title">Quick Call</div>
+            <div class="header-spacer"></div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="container">
+
+            {% if contacts %}
+
+            <!-- PAGE INTRO -->
+            <div class="page-intro">
+                <div class="icon">📞</div>
+                <p>Swipe right to dial instantly</p>
+            </div>
+
+            <!-- CONTACTS LIST -->
+            {% for contact in contacts %}
+            <div class="contact-item">
+                <div class="contact-card priority-{{ contact.priority }}">
+                    <div class="contact-header">
+                        <div class="contact-avatar">👤</div>
+                        <div class="contact-info">
+                            <h3>{{ contact.name }}</h3>
+                            <p class="phone-number">{{ contact.phone }}</p>
+                            <span class="priority-badge p{{ contact.priority }}">Priority {{ contact.priority }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SWIPE TO CALL SLIDER -->
+                <div class="swipe-container">
+                    <div class="swipe-slider" data-phone="{{ contact.phone }}" data-contact-id="{{ contact.id }}">
+                        <div class="swipe-track"></div>
+                        <span class="swipe-text">Swipe to call</span>
+                        <div class="swipe-thumb">📞</div>
+                    </div>
+                    <div class="swipe-cue">↻ slide right</div>
+                </div>
+
+                <!-- COPY BUTTON -->
+                <div class="contact-actions">
+                    <button type="button" class="btn-copy" onclick="copyPhone('{{ contact.phone|escapejs }}', event)">
+                        📋 Copy Number
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+
+            {% else %}
+
+            <!-- EMPTY STATE -->
+            <div class="empty-state">
+                <div class="icon">📇</div>
+                <h3>No Contacts Yet</h3>
+                <p>Add emergency contacts first so you can call them with one tap.</p>
+                <a href="{% url 'emergency' %}" class="add-contacts-btn">+ Add Emergency Contacts</a>
+            </div>
+
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // ===== SWIPE TO CALL FUNCTIONALITY =====
+        class SwipeToCall {
+            constructor(slider) {
+                this.slider = slider;
+                this.thumb = slider.querySelector('.swipe-thumb');
+                this.track = slider.querySelector('.swipe-track');
+                this.phone = slider.dataset.phone;
+                this.isDragging = false;
+                this.startX = 0;
+                this.currentX = 0;
+                this.sliderRect = null;
+                this.THRESHOLD = 0.8;
+
+                this.init();
+            }
+
+            init() {
+                this.thumb.addEventListener('mousedown', (e) => this.handleStart(e));
+                this.thumb.addEventListener('touchstart', (e) => this.handleStart(e), { passive: false });
+                document.addEventListener('mousemove', (e) => this.handleMove(e));
+                document.addEventListener('touchmove', (e) => this.handleMove(e), { passive: false });
+                document.addEventListener('mouseup', (e) => this.handleEnd(e));
+                document.addEventListener('touchend', (e) => this.handleEnd(e));
+            }
+
+            handleStart(e) {
+                if (this.slider.classList.contains('completed')) return;
+
+                this.isDragging = true;
+                this.sliderRect = this.slider.getBoundingClientRect();
+                this.startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                this.currentX = 0;
+
+                this.thumb.classList.add('dragging');
+                this.slider.classList.add('active');
+
+                e.preventDefault();
+            }
+
+            handleMove(e) {
+                if (!this.isDragging) return;
+
+                const currentX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                this.currentX = Math.max(0, currentX - this.startX);
+
+                const maxTravel = this.sliderRect.width - this.thumb.offsetWidth - 32;
+                const progress = Math.min(this.currentX / maxTravel, 1);
+
+                const thumbX = this.currentX;
+                this.thumb.style.transform = `translateX(${thumbX}px)`;
+                this.track.style.width = `${(32 + this.currentX)}px`;
+
+                e.preventDefault();
+            }
+
+            handleEnd(e) {
+                if (!this.isDragging) return;
+
+                this.isDragging = false;
+                this.thumb.classList.remove('dragging');
+
+                const maxTravel = this.sliderRect.width - this.thumb.offsetWidth - 32;
+                const progress = this.currentX / maxTravel;
+
+                if (progress >= this.THRESHOLD) {
+                    this.complete();
+                } else {
+                    this.reset();
+                }
+            }
+
+            complete() {
+                this.slider.classList.remove('active');
+                this.slider.classList.add('completed');
+                this.thumb.style.transform = `translateX(${this.sliderRect.width - this.thumb.offsetWidth - 32}px)`;
+                this.track.style.width = '100%';
+
+                if (navigator.vibrate) {
+                    navigator.vibrate([50, 30, 50]);
+                }
+
+                setTimeout(() => {
+                    window.location.href = `tel:${this.phone}`;
+                }, 300);
+            }
+
+            reset() {
+                this.slider.classList.remove('active');
+                this.thumb.style.transform = 'translateX(0)';
+                this.track.style.width = '0';
+                this.currentX = 0;
+            }
+        }
+
+        // ===== COPY PHONE FUNCTIONALITY =====
+        function copyPhone(phone, event) {
+            event.preventDefault();
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(phone).then(() => {
+                    showToast('Phone number copied!');
+                }).catch(() => {
+                    fallbackCopy(phone);
+                });
+            } else {
+                fallbackCopy(phone);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-9999px';
+            textarea.style.top = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.select();
+
+            try {
+                document.execCommand('copy');
+                showToast('Phone number copied!');
+            } catch (err) {
+                showToast('Copy failed — number: ' + text);
+            }
+
+            document.body.removeChild(textarea);
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        // ===== INITIALIZATION =====
+        document.addEventListener('DOMContentLoaded', () => {
+            const sliders = document.querySelectorAll('.swipe-slider');
+            sliders.forEach(slider => {
+                new SwipeToCall(slider);
+            });
+        });
+    </script>
+
+</body>
+
+</html>

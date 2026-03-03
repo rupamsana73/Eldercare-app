@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: eldercare-app
+    env: python
+    plan: free
+    buildCommand: >
+      pip install -r requirements.txt &&
+      python manage.py collectstatic --noinput &&
+      python manage.py migrate
+    startCommand: gunicorn eldercare_project.wsgi:application
+    envVars:
+      - key: DEBUG
+        value: false
+      - key: PYTHON_VERSION
+        value: 3.9
+    
+  - type: pserv
+    name: eldercare-db
+    ipAllowList: []
+    plan: free
+    postgresVersion: 15

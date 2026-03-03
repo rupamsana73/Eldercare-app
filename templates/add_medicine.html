@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Add Medicine</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="title">Add Medicine</div>
+</div>
+
+<div class="screen">
+
+<form method="POST" class="medicine-form">
+  {% csrf_token %}
+
+  <!-- 1. Medicine Name -->
+  <div class="form-group">
+    <label>Medicine Name</label>
+    <input type="text" name="name" class="input" placeholder="Medicine name" required>
+  </div>
+
+  <!-- 2. Frequency -->
+  <div class="form-group">
+    <label>Frequency</label>
+    <select name="frequency_type" id="frequency" class="input">
+      <option value="daily">Daily</option>
+      <option value="weekly">Weekly</option>
+      <option value="custom_week">Custom Days</option>
+    </select>
+  </div>
+  
+<input type="hidden" name="days_of_week" id="days_of_week">
+
+  <!-- DAILY ONLY -->
+  <div id="dailyBox">
+
+    <!-- 3. Doses per day -->
+    <div class="form-group">
+      <label>Doses per day</label>
+      <select name="dose_per_day" id="dose_per_day" class="input">
+        <option value="1">1 time</option>
+        <option value="2">2 times</option>
+        <option value="3">3 times</option>
+      </select>
+    </div>
+
+    <!-- 4. Time inputs (Daily) -->
+    <div id="dailyTimes">
+
+      <div class="form-group">
+        <label>Time 1</label>
+        <input type="time" name="times[]" class="input">
+      </div>
+
+    
+
+    </div>
+
+  </div>
+
+  <!-- WEEKLY / CUSTOM ONLY -->
+  <div id="weeklyBox">
+
+    <!-- 3. Select Days -->
+    <div class="form-group">
+      <label>Select Days</label>
+      <div class="days-row">
+        <label><input type="checkbox" value="Mon"> Mon</label>
+        <label><input type="checkbox" value="Tue"> Tue</label>
+        <label><input type="checkbox" value="Wed"> Wed</label>
+        <label><input type="checkbox" value="Thu"> Thu</label>
+        <label><input type="checkbox" value="Fri"> Fri</label>
+        <label><input type="checkbox" value="Sat"> Sat</label>
+        <label><input type="checkbox" value="Sun"> Sun</label>
+      </div>
+    </div>
+
+    <!-- 4. Weekly Time -->
+    <div class="form-group">
+      <label>Medicine Time</label>
+      <input type="time" name="times[]" class="input">
+    </div>
+
+  </div>
+
+  <!-- COMMON FIELDS -->
+
+  <!-- 5. Duration -->
+  <div class="form-group">
+    <label>Duration (Days)</label>
+    <input type="number" name="duration_days" class="input" placeholder="Number of days">
+  </div>
+
+  <!-- 6. End Date -->
+  <div class="form-group">
+    <label>End Date</label>
+    <input type="date" name="end_date" class="input">
+  </div>
+
+  <!-- 7. Food Timing -->
+  <div class="form-group">
+    <label>Food Timing</label>
+    <select name="food_timing" class="input">
+      <option value="">----------</option>
+      <option value="Before Food">Before Food</option>
+      <option value="After Food">After Food</option>
+    </select>
+  </div>
+
+  <!-- 8. Notes -->
+  <div class="form-group">
+    <label>Notes</label>
+    <textarea name="notes" class="input" rows="4" placeholder="Optional notes"></textarea>
+  </div>
+
+  <!-- SAVE -->
+  <button type="submit" class="primary-btn">
+    Save Medicine
+  </button>
+
+</form>
+
+</div>
+<script src="/static/script.js"></script>
+</body>
+</html>
+
+
+

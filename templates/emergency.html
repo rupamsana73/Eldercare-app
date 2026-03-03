@@ -1,0 +1,167 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Emergency</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+    <h2>Emergency Help</h2>
+</div>
+
+<div class="emg-wrap">
+
+    <!-- PRIORITY CONTACTS -->
+   <section class="emg-card">
+        <h3>Priority Contacts</h3>
+
+        <!-- PRIORITY 1 -->
+        <div class="contact">
+            <div>
+                <strong>
+                    {{ c1.name|default:"Add Contact" }}
+                </strong>
+                <div class="muted">
+                    {{ c1.phone|default:"—" }}
+                </div>
+            </div>
+
+            <div class="actions">
+             <button class="edit-btn"
+        data-priority="1"
+        data-name="{{ c1.name|default_if_none:'' }}"
+        data-phone="{{ c1.phone|default_if_none:'' }}">
+                 Edit
+              </button>
+
+
+                {% if c1 %}
+                    <a class="call" href="tel:{{ c1.phone }}">Call</a>
+                {% else %}
+                    <a class="call disabled">Call</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- PRIORITY 2 -->
+        <div class="contact">
+            <div>
+                <strong>
+                    {{ c2.name|default:"Add Contact" }}
+                </strong>
+                <div class="muted">
+                    {{ c2.phone|default:"—" }}
+                </div>
+            </div>
+
+            <div class="actions">
+              <button class="edit-btn"
+                   data-priority="2"
+                   data-name="{{ c2.name|default_if_none:'' }}"
+                   data-phone="{{ c2.phone|default_if_none:'' }}">
+                   Edit
+                </button>
+
+
+                {% if c2 %}
+                    <a class="call" href="tel:{{ c2.phone }}">Call</a>
+                {% else %}
+                    <a class="call disabled">Call</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <p class="hint">
+            Call Priority 1 first. If not answered, call Priority 2.
+        </p>
+    </section>
+
+   <!-- EMERGENCY SERVICES -->
+<section class="card">
+    <button type="button" class="emg-big" onclick="openSheet()">
+        Emergency Services
+    </button>
+
+    {% if c1 %}
+    <button class="sms"
+onclick="sendLocationSMS('{{ c1.phone|escapejs }}')">
+    Send Emergency SMS
+</button>
+
+    {% else %}
+    <button class="sms disabled">
+        Send Emergency SMS
+    </button>
+    {% endif %}
+</section>
+
+<!-- BOTTOM SHEET -->
+<div class="sheet" id="sheet">
+    <div class="sheet-head" onclick="closeSheet()"></div>
+
+    {% if c1 %}
+   <button class="sheet-btn red"
+onclick="startEmergencyCall('{{ c1.phone|escapejs }}','{{ c2.phone|escapejs }}')">
+📞 Call Emergency Contacts
+</button>
+
+    {% endif %}
+
+    <a href="tel:108" class="sheet-btn red">
+        🚑 Ambulance (108)
+    </a>
+
+    <a href="tel:112" class="sheet-btn red">
+        🚨 Emergency (112)
+    </a>
+
+    <a href="https://www.google.com/maps/search/hospital+near+me"
+       target="_blank"
+       class="sheet-btn">
+        🏥 Nearby Hospital
+    </a>
+
+    <button class="sheet-close" onclick="closeSheet()">Close</button>
+</div>
+
+
+<!-- CONTACT POPUP -->
+<div class="popup-bg" id="popupBg">
+  <div class="popup-card">
+    <h3>Edit Emergency Contact</h3>
+
+    <form method="POST" action="/save-emergency/" onsubmit="setTimeout(showToast, 300)">
+      {% csrf_token %}
+      <input type="hidden" name="priority" id="popupPriority">
+
+      <input type="text"
+             name="name"
+             id="popupName"
+             placeholder="Contact Name"
+             required>
+
+      <input type="tel"
+             name="phone"
+             id="popupPhone"
+             placeholder="Phone Number"
+             required>
+
+      <button type="submit" class="emg-big">Save</button>
+      <button type="button" class="popup-close" onclick="closePopup()">Cancel</button>
+    </form>
+  </div>
+</div>
+
+<!-- SUCCESS TOAST -->
+<div id="toast" class="toast">
+    Emergency contact saved successfully
+</div>
+
+<script src="{% static 'script.js' %}"></script>
+</body>
+</html>
