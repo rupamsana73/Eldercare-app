@@ -18,3 +18,7 @@ whitenoise==6.7.0
 gunicorn==21.2.0
 dj-database-url==2.1.0
 psycopg[binary]
+opencv-python-headless==4.10.0.84
+pytesseract==0.3.10
+rapidfuzz==3.9.6
+pandas==2.2.2
